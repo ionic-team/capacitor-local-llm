@@ -27,13 +27,18 @@ const Home: React.FC = () => {
   const onPromptBtn = async () => {
     setAwaitingResponse(true);
 
-    const res = await LocalLLM.prompt({
-      prompt,
-    });
+    try {
+      const res = await LocalLLM.prompt({
+        prompt,
+      });
 
-    setAwaitingResponse(false);
+      setAwaitingResponse(false);
 
-    setResponse(res.text);
+      setResponse(res.text);
+    } catch (err: unknown) {
+      setAwaitingResponse(false);
+      setResponse((err as Error).message);
+    }
   };
 
   return (
