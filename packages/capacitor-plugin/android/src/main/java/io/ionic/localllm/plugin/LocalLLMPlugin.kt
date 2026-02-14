@@ -17,11 +17,13 @@ class LocalLLMPlugin : Plugin() {
     }
 
   @PluginMethod fun systemAvailability(call: PluginCall) {
-      try {
-          val impl = this.implementation ?: throw Exception("LocalLLM not initialized")
-          call.resolve(JSObject().put("status", impl.availability().value))
-      } catch (ex: Exception) {
-          call.reject(ex.message)
+      runBlocking {
+          try {
+              val impl = this@LocalLLMPlugin.implementation ?: throw Exception("LocalLLM not initialized")
+              call.resolve(JSObject().put("status", impl.availability().value))
+          } catch (ex: Exception) {
+              call.reject(ex.message)
+          }
       }
   }
 

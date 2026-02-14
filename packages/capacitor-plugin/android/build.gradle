@@ -59,7 +59,7 @@ repositories {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation project(':capacitor-android')
-    implementation("com.google.ai.edge.aicore:aicore:0.0.1-exp02")
+    implementation("com.google.mlkit:genai-prompt:1.0.0-beta1")
     implementation "androidx.appcompat:appcompat:$androidxAppCompatVersion"
     implementation 'androidx.core:core-ktx:1.16.0'
     testImplementation "junit:junit:$junitVersion"

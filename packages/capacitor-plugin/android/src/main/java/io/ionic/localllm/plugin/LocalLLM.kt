@@ -1,41 +1,50 @@
 package io.ionic.localllm.plugin
 
 import android.os.Build
-import com.google.ai.edge.aicore.GenerativeModel
-import com.google.ai.edge.aicore.generationConfig
+import com.google.mlkit.genai.common.FeatureStatus
+import com.google.mlkit.genai.prompt.Generation
+
+import com.google.mlkit.genai.prompt.GenerativeModel
+import com.google.mlkit.genai.prompt.TextPart
+import com.google.mlkit.genai.prompt.generateContentRequest
 
 class LocalLLM(private val context: android.content.Context) {
-    fun availability(): LLMAvailability {
-        // this can only run on Google Pixel 8 Pro and greater
-        // with the experimental AI Core for now
-        val make = Build.MANUFACTURER
-        val model = Build.MODEL
+    val model: GenerativeModel = Generation.getClient()
 
-        val supportedModels = listOf(
-            "Pixel 10 Pro",
-            "Pixel 9 Pro",
-            "Pixel 8 Pro",
-        )
+    suspend fun availability(): LLMAvailability {
+        val status = model.checkStatus()
+        when (status) {
+            FeatureStatus.UNAVAILABLE -> {
+                return LLMAvailability.Unavailable
+            }
 
-        if (make == "Google" && supportedModels.contains(model)) {
-            return LLMAvailability.Available
+            FeatureStatus.DOWNLOADABLE ->{
+                LLMAvailability.NotReady
+            }
+
+            FeatureStatus.DOWNLOADING -> {
+                return LLMAvailability.NotReady
+            }
+
+            FeatureStatus.AVAILABLE -> {
+                return LLMAvailability.Available
+            }
         }
 
         return LLMAvailability.Unavailable
     }
 
     suspend fun prompt(options: LLMPromptOptions): String {
-        val config = generationConfig {
-            context = this@LocalLLM.context
-            temperature = options.options?.temperature
-            topK = 16
-            maxOutputTokens = options.options?.maxOutputTokens
-        }
+        val response = model.generateContent(
+            generateContentRequest(
+                TextPart(options.prompt)
+            ) {
+                temperature = options.options?.temperature
+                topK = 16
+                maxOutputTokens = options.options?.maxOutputTokens
+            }
+        )
 
-        val model = GenerativeModel(config)
-
-        val response = model.generateContent(options.prompt)
-
-        return response.text ?: throw Exception("response was empty")
+        return response.candidates.first().text
     }
 }
