@@ -14,10 +14,11 @@ npx cap sync
 <docgen-index>
 
 * [`systemAvailability()`](#systemavailability)
+* [`download()`](#download)
 * [`prompt(...)`](#prompt)
 * [`endSession(...)`](#endsession)
 * [Interfaces](#interfaces)
-* [Enums](#enums)
+* [Type Aliases](#type-aliases)
 
 </docgen-index>
 
@@ -31,6 +32,15 @@ systemAvailability() => Promise<SystemAvailabilityResponse>
 ```
 
 **Returns:** <code>Promise&lt;<a href="#systemavailabilityresponse">SystemAvailabilityResponse</a>&gt;</code>
+
+--------------------
+
+
+### download()
+
+```typescript
+download() => Promise<void>
+```
 
 --------------------
 
@@ -105,17 +115,11 @@ endSession(options: EndSessionOptions) => Promise<void>
 | **`sessionId`** | <code>string</code> |
 
 
-### Enums
+### Type Aliases
 
 
 #### LLMAvailability
 
-| Members           | Value                      |
-| ----------------- | -------------------------- |
-| **`Available`**   | <code>'available'</code>   |
-| **`Unavailable`** | <code>'unavailable'</code> |
-| **`Unsupported`** | <code>'unsupported'</code> |
-| **`NotEnabled`**  | <code>'notEnabled'</code>  |
-| **`NotReady`**    | <code>'notReady'</code>    |
+<code>'available' | 'unavailable' | 'notready' | 'downloadable'</code>
 
 </docgen-api>

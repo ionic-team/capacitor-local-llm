@@ -14,7 +14,28 @@ const Tab1: React.FC = () => {
   const onStatusBtn = async () => {
     const res = await LocalLLM.systemAvailability();
     setSystemStatus(res.status);
+
+    if (res.status == 'downloadable') {
+      onDownloadingModel();
+    }
   };
+
+  const onDownloadingModel = async () => {
+    let interval: NodeJS.Timeout | null = null;
+    try {
+      interval = setInterval(async () => {
+        const res = await LocalLLM.systemAvailability();
+        setSystemStatus(res.status);
+      }, 1000);
+      await LocalLLM.download();
+      clearInterval(interval);
+    } catch (err) {
+      if (interval) {
+        clearInterval(interval)
+      }
+      setResponse((err as Error).message);
+    }
+  }
 
   const onPromptBtn = async () => {
     setAwaitingResponse(true);

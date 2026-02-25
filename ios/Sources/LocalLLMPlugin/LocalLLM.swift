@@ -3,11 +3,9 @@ import FoundationModels
 
 public enum LLMAvailability: String, Sendable {
   case available = "available"
-  case unsupported = "unsupported"
-  case notEnabled = "notEnabled"
-  case notReady = "notReady"
   case unavailable = "unavailable"
-    case responding = "responding"
+  case notReady = "notready"
+  case responding = "responding"
 }
 
 public struct LLMOptions: Sendable {
@@ -46,9 +44,9 @@ public class LocalLLM {
       case .available:
         return .available
       case .unavailable(.deviceNotEligible):
-        return .unsupported
+        return .unavailable
       case .unavailable(.appleIntelligenceNotEnabled):
-        return .notEnabled
+        return .unavailable
       case .unavailable(.modelNotReady):
         return .notReady
       case .unavailable(_):
@@ -56,7 +54,7 @@ public class LocalLLM {
       }
     }
     
-    return .unsupported
+    return .unavailable
   }
 
   func prompt(options: LLMPromptOptions) async throws -> String {

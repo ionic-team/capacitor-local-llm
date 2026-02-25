@@ -27,6 +27,18 @@ class LocalLLMPlugin : Plugin() {
       }
   }
 
+    @PluginMethod fun download(call: PluginCall) {
+        runBlocking {
+            try {
+                val impl = this@LocalLLMPlugin.implementation ?: throw Exception("LocalLLM not initialized")
+                impl.download()
+                call.resolve()
+            } catch (ex: Exception) {
+                call.reject(ex.message)
+            }
+        }
+    }
+
   @PluginMethod
   fun prompt(call: PluginCall) {
       runBlocking {
