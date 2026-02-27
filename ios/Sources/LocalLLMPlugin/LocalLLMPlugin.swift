@@ -54,23 +54,16 @@ public class LocalLLMPlugin: CAPPlugin, CAPBridgedPlugin {
             call.reject("prompt is required")
             return
         }
-
-        let width = call.getInt("width")
-        let height = call.getInt("height")
-        let steps = call.getInt("steps")
-        let guidanceScale = call.getDouble("guidanceScale")
+        let count = call.getInt("count", 1)
 
         generateImageAsyncCallback(
             prompt: prompt,
-            width: width,
-            height: height,
-            steps: steps,
-            guidanceScale: guidanceScale
+            count: count,
         ) { result in
             switch result {
-            case .success(let base64Image):
+            case .success(let base64Images):
                 call.resolve([
-                    "base64Image": base64Image
+                    "pngBase64Images": base64Images
                 ])
             case .failure(let error):
                 call.reject(error.localizedDescription)
@@ -94,22 +87,16 @@ public class LocalLLMPlugin: CAPPlugin, CAPBridgedPlugin {
 
     private func generateImageAsyncCallback(
         prompt: String,
-        width: Int?,
-        height: Int?,
-        steps: Int?,
-        guidanceScale: Double?,
-        completion: @escaping @Sendable (Result<String, Error>) -> Void
+        count: Int,
+        completion: @escaping @Sendable (Result<[String], Error>) -> Void
     ) {
         Task {
             do {
-                let base64Image = try await implementation.generateImage(
+                let images = try await implementation.generateImage(
                     prompt: prompt,
-                    width: width,
-                    height: height,
-                    steps: steps,
-                    guidanceScale: guidanceScale
+                    variations: count
                 )
-                completion(.success(base64Image))
+                completion(.success(images))
             } catch {
                 completion(.failure(error))
             }

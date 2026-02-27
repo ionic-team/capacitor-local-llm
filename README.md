@@ -182,22 +182,19 @@ Options for ending an active LLM session.
 
 Response containing the generated image data.
 
-| Prop              | Type                | Description                                                                                              | Since |
-| ----------------- | ------------------- | -------------------------------------------------------------------------------------------------------- | ----- |
-| **`base64Image`** | <code>string</code> | The generated image as a base64-encoded string. This can be used directly in an img tag with a data URI. | 1.0.0 |
+| Prop                  | Type                  | Description                                                                                              | Since |
+| --------------------- | --------------------- | -------------------------------------------------------------------------------------------------------- | ----- |
+| **`pngBase64Images`** | <code>string[]</code> | The generated image as a base64-encoded string. This can be used directly in an img tag with a data URI. | 1.0.0 |
 
 
 #### GenerateImageOptions
 
 Options for generating an image from a text prompt.
 
-| Prop                | Type                | Description                                                                                                        | Since |
-| ------------------- | ------------------- | ------------------------------------------------------------------------------------------------------------------ | ----- |
-| **`prompt`**        | <code>string</code> | The text prompt describing the image to generate.                                                                  | 1.0.0 |
-| **`width`**         | <code>number</code> | Optional width of the generated image in pixels.                                                                   | 1.0.0 |
-| **`height`**        | <code>number</code> | Optional height of the generated image in pixels.                                                                  | 1.0.0 |
-| **`steps`**         | <code>number</code> | Optional number of inference steps for image generation. Higher values may produce better quality but take longer. | 1.0.0 |
-| **`guidanceScale`** | <code>number</code> | Optional guidance scale for how closely to follow the prompt. Higher values adhere more strictly to the prompt.    | 1.0.0 |
+| Prop         | Type                | Description                                       | Since |
+| ------------ | ------------------- | ------------------------------------------------- | ----- |
+| **`prompt`** | <code>string</code> | The text prompt describing the image to generate. | 1.0.0 |
+| **`count`**  | <code>number</code> |                                                   |       |
 
 
 ### Type Aliases

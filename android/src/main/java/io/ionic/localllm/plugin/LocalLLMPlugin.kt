@@ -64,13 +64,10 @@ class LocalLLMPlugin : Plugin() {
                     return@runBlocking
                 }
 
-                val width = call.getInt("width")
-                val height = call.getInt("height")
-                val steps = call.getInt("steps")
-                val guidanceScale = call.getDouble("guidanceScale")?.toFloat()
+                val count = call.getInt("count", 1) ?: 1
 
                 val impl = this@LocalLLMPlugin.implementation ?: throw Exception("LocalLLM not initialized")
-                val base64Image = impl.generateImage(prompt, width, height, steps, guidanceScale)
+                val base64Image = impl.generateImage(prompt, count)
                 call.resolve(JSObject().put("base64Image", base64Image))
             } catch (ex: Exception) {
                 call.reject(ex.message)

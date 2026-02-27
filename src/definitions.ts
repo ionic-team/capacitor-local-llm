@@ -218,37 +218,7 @@ export interface GenerateImageOptions {
    */
   prompt: string;
 
-  /**
-   * Optional width of the generated image in pixels.
-   *
-   * @since 1.0.0
-   */
-  width?: number;
-
-  /**
-   * Optional height of the generated image in pixels.
-   *
-   * @since 1.0.0
-   */
-  height?: number;
-
-  /**
-   * Optional number of inference steps for image generation.
-   *
-   * Higher values may produce better quality but take longer.
-   *
-   * @since 1.0.0
-   */
-  steps?: number;
-
-  /**
-   * Optional guidance scale for how closely to follow the prompt.
-   *
-   * Higher values adhere more strictly to the prompt.
-   *
-   * @since 1.0.0
-   */
-  guidanceScale?: number;
+  count?: number;
 }
 
 /**
@@ -265,5 +235,5 @@ export interface GenerateImageResponse {
    * @since 1.0.0
    * @example 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUg...'
    */
-  base64Image: string;
+  pngBase64Images: string[];
 }

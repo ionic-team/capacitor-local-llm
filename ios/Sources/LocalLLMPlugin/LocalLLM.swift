@@ -1,5 +1,8 @@
 import Foundation
 import FoundationModels
+import ImagePlayground
+import ImageIO
+import MobileCoreServices
 
 public enum LLMAvailability: String, Sendable {
     case available = "available"
@@ -92,14 +95,45 @@ public class LocalLLM {
         }
     }
 
-    func generateImage(prompt: String, width: Int?, height: Int?, steps: Int?, guidanceScale: Double?)
-    async throws -> String {
-        // TODO: Implement image generation using Apple's on-device image generation APIs
-        // This is a stub implementation - fill in with actual image generation logic
-        if #available(iOS 26.0, *) {
-            throw LocalLLMError.unsupported
+  func generateImage(prompt: String, variations: Int)
+    async throws -> [String] {
+      if #available(iOS 18.4, *) {
+        let creator = try await ImageCreator()
+        guard let style = creator.availableStyles.first else {
+          throw LocalLLMError.unsupported
         }
-
+        
+        let images = creator.images(for: [.text(prompt)], style: style, limit: variations)
+        
+        var imageData: [String] = []
+        
+        for try await image in images {
+          if let imagePNGData = image.cgImage.toPNGData() {
+            imageData.append(imagePNGData.base64EncodedString())
+          }
+        }
+        
+        return imageData
+      } else {
         throw LocalLLMError.unsupported
+      }
     }
+}
+
+extension CGImage {
+  func toPNGData() -> Data? {
+    let pngData = NSMutableData()
+    
+    guard let dest = CGImageDestinationCreateWithData(pngData, kUTTypePNG, 1, nil) else {
+      return nil
+    }
+    
+    CGImageDestinationAddImage(dest, self, nil)
+    
+    if CGImageDestinationFinalize(dest) {
+        return pngData as Data
+    }
+    
+    return nil
+  }
 }

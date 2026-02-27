@@ -1,6 +1,5 @@
 package io.ionic.localllm.plugin
 
-import android.os.Build
 import com.getcapacitor.Logger
 import com.google.mlkit.genai.common.DownloadStatus
 import com.google.mlkit.genai.common.FeatureStatus
@@ -109,10 +108,7 @@ class LocalLLM(private val context: android.content.Context) {
 
     suspend fun generateImage(
         prompt: String,
-        width: Int?,
-        height: Int?,
-        steps: Int?,
-        guidanceScale: Float?
+        count: Int
     ): String {
         // TODO: Implement image generation using Android's on-device image generation APIs
         // This is a stub implementation - fill in with actual image generation logic
