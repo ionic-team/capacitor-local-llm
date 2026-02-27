@@ -2,6 +2,8 @@ import { WebPlugin } from '@capacitor/core';
 
 import type {
   EndSessionOptions,
+  GenerateImageOptions,
+  GenerateImageResponse,
   PromptOptions,
   PromptResponse,
   LocalLLMPlugin,
@@ -19,6 +21,9 @@ export class LocalLLMWeb extends WebPlugin implements LocalLLMPlugin {
     throw new Error('not available on the web.');
   }
   endSession(_options: EndSessionOptions): Promise<void> {
+    throw new Error('not available on the web.');
+  }
+  generateImage(_options: GenerateImageOptions): Promise<GenerateImageResponse> {
     throw new Error('not available on the web.');
   }
 }

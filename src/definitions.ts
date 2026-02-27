@@ -68,6 +68,22 @@ export interface LocalLLMPlugin {
    * @returns A promise that resolves when the session is ended
    */
   endSession(options: EndSessionOptions): Promise<void>;
+
+  /**
+   * Generates an image from a text prompt using the on-device LLM.
+   *
+   * Use this method to create images based on text descriptions. The generated
+   * image is returned as a base64-encoded string.
+   *
+   * @since 1.0.0
+   * @example
+   * ```typescript
+   * const result = await LocalLLM.generateImage({ prompt: 'A sunset over mountains' });
+   * ```
+   * @param options - The image generation options including the prompt
+   * @returns A promise that resolves with the generated image data
+   */
+  generateImage(options: GenerateImageOptions): Promise<GenerateImageResponse>;
 }
 
 /**
@@ -188,3 +204,66 @@ export interface EndSessionOptions {
  * @since 1.0.0
  */
 export type LLMAvailability = 'available' | 'unavailable' | 'notready' | 'downloadable' | 'responding';
+
+/**
+ * Options for generating an image from a text prompt.
+ *
+ * @since 1.0.0
+ */
+export interface GenerateImageOptions {
+  /**
+   * The text prompt describing the image to generate.
+   *
+   * @since 1.0.0
+   */
+  prompt: string;
+
+  /**
+   * Optional width of the generated image in pixels.
+   *
+   * @since 1.0.0
+   */
+  width?: number;
+
+  /**
+   * Optional height of the generated image in pixels.
+   *
+   * @since 1.0.0
+   */
+  height?: number;
+
+  /**
+   * Optional number of inference steps for image generation.
+   *
+   * Higher values may produce better quality but take longer.
+   *
+   * @since 1.0.0
+   */
+  steps?: number;
+
+  /**
+   * Optional guidance scale for how closely to follow the prompt.
+   *
+   * Higher values adhere more strictly to the prompt.
+   *
+   * @since 1.0.0
+   */
+  guidanceScale?: number;
+}
+
+/**
+ * Response containing the generated image data.
+ *
+ * @since 1.0.0
+ */
+export interface GenerateImageResponse {
+  /**
+   * The generated image as a base64-encoded string.
+   *
+   * This can be used directly in an img tag with a data URI.
+   *
+   * @since 1.0.0
+   * @example 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUg...'
+   */
+  base64Image: string;
+}

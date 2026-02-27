@@ -12,7 +12,8 @@ public class LocalLLMPlugin: CAPPlugin, CAPBridgedPlugin {
             returnType: CAPPluginReturnPromise
         ),
         CAPPluginMethod(name: "prompt", returnType: CAPPluginReturnPromise),
-        CAPPluginMethod(name: "endSession", returnType: CAPPluginReturnPromise)
+        CAPPluginMethod(name: "endSession", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "generateImage", returnType: CAPPluginReturnPromise)
     ]
 
     private let implementation = LocalLLM()
@@ -48,6 +49,35 @@ public class LocalLLMPlugin: CAPPlugin, CAPBridgedPlugin {
         call.resolve()
     }
 
+    @objc func generateImage(_ call: CAPPluginCall) {
+        guard let prompt = call.getString("prompt") else {
+            call.reject("prompt is required")
+            return
+        }
+
+        let width = call.getInt("width")
+        let height = call.getInt("height")
+        let steps = call.getInt("steps")
+        let guidanceScale = call.getDouble("guidanceScale")
+
+        generateImageAsyncCallback(
+            prompt: prompt,
+            width: width,
+            height: height,
+            steps: steps,
+            guidanceScale: guidanceScale
+        ) { result in
+            switch result {
+            case .success(let base64Image):
+                call.resolve([
+                    "base64Image": base64Image
+                ])
+            case .failure(let error):
+                call.reject(error.localizedDescription)
+            }
+        }
+    }
+
     private func promptAsyncCallback(
         options: LLMPromptOptions,
         completion: @escaping @Sendable (Result<String, Error>) -> Void
@@ -56,6 +86,30 @@ public class LocalLLMPlugin: CAPPlugin, CAPBridgedPlugin {
             do {
                 let responseText = try await implementation.prompt(options: options)
                 completion(.success(responseText))
+            } catch {
+                completion(.failure(error))
+            }
+        }
+    }
+
+    private func generateImageAsyncCallback(
+        prompt: String,
+        width: Int?,
+        height: Int?,
+        steps: Int?,
+        guidanceScale: Double?,
+        completion: @escaping @Sendable (Result<String, Error>) -> Void
+    ) {
+        Task {
+            do {
+                let base64Image = try await implementation.generateImage(
+                    prompt: prompt,
+                    width: width,
+                    height: height,
+                    steps: steps,
+                    guidanceScale: guidanceScale
+                )
+                completion(.success(base64Image))
             } catch {
                 completion(.failure(error))
             }

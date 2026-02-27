@@ -17,6 +17,7 @@ npx cap sync
 * [`download()`](#download)
 * [`prompt(...)`](#prompt)
 * [`endSession(...)`](#endsession)
+* [`generateImage(...)`](#generateimage)
 * [Interfaces](#interfaces)
 * [Type Aliases](#type-aliases)
 
@@ -103,6 +104,28 @@ This is important for managing memory and preventing resource leaks.
 --------------------
 
 
+### generateImage(...)
+
+```typescript
+generateImage(options: GenerateImageOptions) => Promise<GenerateImageResponse>
+```
+
+Generates an image from a text prompt using the on-device LLM.
+
+Use this method to create images based on text descriptions. The generated
+image is returned as a base64-encoded string.
+
+| Param         | Type                                                                  | Description                                         |
+| ------------- | --------------------------------------------------------------------- | --------------------------------------------------- |
+| **`options`** | <code><a href="#generateimageoptions">GenerateImageOptions</a></code> | - The image generation options including the prompt |
+
+**Returns:** <code>Promise&lt;<a href="#generateimageresponse">GenerateImageResponse</a>&gt;</code>
+
+**Since:** 1.0.0
+
+--------------------
+
+
 ### Interfaces
 
 
@@ -153,6 +176,28 @@ Options for ending an active LLM session.
 | Prop            | Type                | Description                                                                                            | Since |
 | --------------- | ------------------- | ------------------------------------------------------------------------------------------------------ | ----- |
 | **`sessionId`** | <code>string</code> | The identifier of the session to end. This should match the sessionId used in previous prompt() calls. | 1.0.0 |
+
+
+#### GenerateImageResponse
+
+Response containing the generated image data.
+
+| Prop              | Type                | Description                                                                                              | Since |
+| ----------------- | ------------------- | -------------------------------------------------------------------------------------------------------- | ----- |
+| **`base64Image`** | <code>string</code> | The generated image as a base64-encoded string. This can be used directly in an img tag with a data URI. | 1.0.0 |
+
+
+#### GenerateImageOptions
+
+Options for generating an image from a text prompt.
+
+| Prop                | Type                | Description                                                                                                        | Since |
+| ------------------- | ------------------- | ------------------------------------------------------------------------------------------------------------------ | ----- |
+| **`prompt`**        | <code>string</code> | The text prompt describing the image to generate.                                                                  | 1.0.0 |
+| **`width`**         | <code>number</code> | Optional width of the generated image in pixels.                                                                   | 1.0.0 |
+| **`height`**        | <code>number</code> | Optional height of the generated image in pixels.                                                                  | 1.0.0 |
+| **`steps`**         | <code>number</code> | Optional number of inference steps for image generation. Higher values may produce better quality but take longer. | 1.0.0 |
+| **`guidanceScale`** | <code>number</code> | Optional guidance scale for how closely to follow the prompt. Higher values adhere more strictly to the prompt.    | 1.0.0 |
 
 
 ### Type Aliases

@@ -55,6 +55,30 @@ class LocalLLMPlugin : Plugin() {
   }
 
     @PluginMethod
+    fun generateImage(call: PluginCall) {
+        runBlocking {
+            try {
+                val prompt = call.getString("prompt")
+                if (prompt == null) {
+                    call.reject("prompt is required")
+                    return@runBlocking
+                }
+
+                val width = call.getInt("width")
+                val height = call.getInt("height")
+                val steps = call.getInt("steps")
+                val guidanceScale = call.getDouble("guidanceScale")?.toFloat()
+
+                val impl = this@LocalLLMPlugin.implementation ?: throw Exception("LocalLLM not initialized")
+                val base64Image = impl.generateImage(prompt, width, height, steps, guidanceScale)
+                call.resolve(JSObject().put("base64Image", base64Image))
+            } catch (ex: Exception) {
+                call.reject(ex.message)
+            }
+        }
+    }
+
+    @PluginMethod
     fun endSession(call: PluginCall) {
         try {
             val sessionId = call.getString("sessionId")

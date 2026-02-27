@@ -106,4 +106,17 @@ class LocalLLM(private val context: android.content.Context) {
     fun endSession(sessionId: String) {
         sessions.remove(sessionId)
     }
+
+    suspend fun generateImage(
+        prompt: String,
+        width: Int?,
+        height: Int?,
+        steps: Int?,
+        guidanceScale: Float?
+    ): String {
+        // TODO: Implement image generation using Android's on-device image generation APIs
+        // This is a stub implementation - fill in with actual image generation logic
+        // Return base64-encoded image string
+        throw NotImplementedError("Image generation not yet implemented for Android")
+    }
 }

@@ -91,4 +91,15 @@ public class LocalLLM {
             sessions[sessionId] = nil
         }
     }
+
+    func generateImage(prompt: String, width: Int?, height: Int?, steps: Int?, guidanceScale: Double?)
+    async throws -> String {
+        // TODO: Implement image generation using Apple's on-device image generation APIs
+        // This is a stub implementation - fill in with actual image generation logic
+        if #available(iOS 26.0, *) {
+            throw LocalLLMError.unsupported
+        }
+
+        throw LocalLLMError.unsupported
+    }
 }
