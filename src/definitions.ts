@@ -72,16 +72,24 @@ export interface LocalLLMPlugin {
   /**
    * Generates images from a text prompt using the on-device LLM.
    *
-   * Use this method to create images based on text descriptions. The generated
-   * images are returned as base64-encoded PNG strings in an array.
+   * Use this method to create images based on text descriptions. Optionally provide
+   * reference images to influence the generation. The generated images are returned
+   * as base64-encoded PNG strings in an array.
    *
    * @since 1.0.0
    * @example
    * ```typescript
+   * // Generate 2 variations from a text prompt
    * const result = await LocalLLM.generateImage({ prompt: 'A sunset over mountains', count: 2 });
    * console.log(result.pngBase64Images.length); // 2
+   *
+   * // Generate with reference image
+   * const withRef = await LocalLLM.generateImage({
+   *   prompt: 'A modern version of this painting',
+   *   promptImages: ['data:image/png;base64,iVBORw0KGg...']
+   * });
    * ```
-   * @param options - The image generation options including the prompt and optional count
+   * @param options - The image generation options including the prompt, optional reference images, and count
    * @returns A promise that resolves with an array of generated image data
    */
   generateImage(options: GenerateImageOptions): Promise<GenerateImageResponse>;
@@ -219,6 +227,16 @@ export interface GenerateImageOptions {
    */
   prompt: string;
 
+  /**
+   * Optional array of reference images to influence the generated output.
+   *
+   * Provide base64-encoded image strings (with or without data URI prefix) that
+   * will be used as visual context or inspiration for the image generation.
+   * This allows you to combine text and image concepts for more controlled output.
+   *
+   * @since 1.0.0
+   * @example ['data:image/png;base64,iVBORw0KGg...', '/9j/4AAQSkZJRg...']
+   */
   promptImages?: string[];
 
   /**

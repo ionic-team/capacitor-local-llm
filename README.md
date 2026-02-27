@@ -112,12 +112,13 @@ generateImage(options: GenerateImageOptions) => Promise<GenerateImageResponse>
 
 Generates images from a text prompt using the on-device LLM.
 
-Use this method to create images based on text descriptions. The generated
-images are returned as base64-encoded PNG strings in an array.
+Use this method to create images based on text descriptions. Optionally provide
+reference images to influence the generation. The generated images are returned
+as base64-encoded PNG strings in an array.
 
-| Param         | Type                                                                  | Description                                                            |
-| ------------- | --------------------------------------------------------------------- | ---------------------------------------------------------------------- |
-| **`options`** | <code><a href="#generateimageoptions">GenerateImageOptions</a></code> | - The image generation options including the prompt and optional count |
+| Param         | Type                                                                  | Description                                                                               |
+| ------------- | --------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| **`options`** | <code><a href="#generateimageoptions">GenerateImageOptions</a></code> | - The image generation options including the prompt, optional reference images, and count |
 
 **Returns:** <code>Promise&lt;<a href="#generateimageresponse">GenerateImageResponse</a>&gt;</code>
 
@@ -191,11 +192,11 @@ Response containing the generated image data.
 
 Options for generating an image from a text prompt.
 
-| Prop               | Type                  | Description                                                                 | Default        | Since |
-| ------------------ | --------------------- | --------------------------------------------------------------------------- | -------------- | ----- |
-| **`prompt`**       | <code>string</code>   | The text prompt describing the image to generate.                           |                | 1.0.0 |
-| **`promptImages`** | <code>string[]</code> |                                                                             |                |       |
-| **`count`**        | <code>number</code>   | The number of image variations to generate. Defaults to 1 if not specified. | <code>1</code> | 1.0.0 |
+| Prop               | Type                  | Description                                                                                                                                                                                                                                                                                              | Default        | Since |
+| ------------------ | --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------- | ----- |
+| **`prompt`**       | <code>string</code>   | The text prompt describing the image to generate.                                                                                                                                                                                                                                                        |                | 1.0.0 |
+| **`promptImages`** | <code>string[]</code> | Optional array of reference images to influence the generated output. Provide base64-encoded image strings (with or without data URI prefix) that will be used as visual context or inspiration for the image generation. This allows you to combine text and image concepts for more controlled output. |                | 1.0.0 |
+| **`count`**        | <code>number</code>   | The number of image variations to generate. Defaults to 1 if not specified.                                                                                                                                                                                                                              | <code>1</code> | 1.0.0 |
 
 
 ### Type Aliases
