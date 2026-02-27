@@ -54,6 +54,23 @@ class LocalLLMPlugin : Plugin() {
       }
   }
 
+    @PluginMethod
+    fun endSession(call: PluginCall) {
+        try {
+            val sessionId = call.getString("sessionId")
+            if (sessionId == null) {
+                call.reject("sessionId is required")
+                return
+            }
+
+            val impl = this@LocalLLMPlugin.implementation ?: throw Exception("LocalLLM not initialized")
+            impl.endSession(sessionId)
+            call.resolve()
+        } catch (ex: Exception) {
+            call.reject(ex.message)
+        }
+    }
+
     private fun getLLMPromptOptionsFromCall(call: PluginCall): LLMPromptOptions {
         return LLMPromptOptions(
             sessionId = call.getString("sessionId"),

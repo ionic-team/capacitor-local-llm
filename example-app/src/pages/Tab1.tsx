@@ -8,6 +8,7 @@ import './Tab1.css';
 const Tab1: React.FC = () => {
   const [systemStatus, setSystemStatus] = useState<string>("---");
   const [prompt, setPrompt] = useState<string>("What is an LLM?");
+  const [sessionId, setSessionId] = useState<string>("");
   const [response, setResponse] = useState<string>("---");
   const [awaitingResponse, setAwaitingResponse] = useState<boolean>(false);
 
@@ -40,9 +41,15 @@ const Tab1: React.FC = () => {
   const onPromptBtn = async () => {
     setAwaitingResponse(true);
 
+    let promptSessionId: string | undefined = sessionId;
+    if (promptSessionId == "") {
+      promptSessionId = undefined;
+    }
+
     try {
       const res = await LocalLLM.prompt({
         prompt,
+        sessionId: promptSessionId
       });
 
       setAwaitingResponse(false);
@@ -72,6 +79,14 @@ const Tab1: React.FC = () => {
             Check Status
           </IonButton>
           <code>{systemStatus}</code>
+
+          <IonTextarea
+            label="Enter a Session ID (optional)"
+            value={sessionId}
+            onChange={(e) => {
+              setSessionId(e.currentTarget.value ?? "");
+            }}
+          ></IonTextarea>
 
           <IonTextarea
             label="Enter a Prompt"
