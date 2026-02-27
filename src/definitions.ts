@@ -70,18 +70,19 @@ export interface LocalLLMPlugin {
   endSession(options: EndSessionOptions): Promise<void>;
 
   /**
-   * Generates an image from a text prompt using the on-device LLM.
+   * Generates images from a text prompt using the on-device LLM.
    *
    * Use this method to create images based on text descriptions. The generated
-   * image is returned as a base64-encoded string.
+   * images are returned as base64-encoded PNG strings in an array.
    *
    * @since 1.0.0
    * @example
    * ```typescript
-   * const result = await LocalLLM.generateImage({ prompt: 'A sunset over mountains' });
+   * const result = await LocalLLM.generateImage({ prompt: 'A sunset over mountains', count: 2 });
+   * console.log(result.pngBase64Images.length); // 2
    * ```
-   * @param options - The image generation options including the prompt
-   * @returns A promise that resolves with the generated image data
+   * @param options - The image generation options including the prompt and optional count
+   * @returns A promise that resolves with an array of generated image data
    */
   generateImage(options: GenerateImageOptions): Promise<GenerateImageResponse>;
 }
@@ -218,6 +219,16 @@ export interface GenerateImageOptions {
    */
   prompt: string;
 
+  promptImages?: string[];
+
+  /**
+   * The number of image variations to generate.
+   *
+   * Defaults to 1 if not specified.
+   *
+   * @since 1.0.0
+   * @default 1
+   */
   count?: number;
 }
 
@@ -228,12 +239,13 @@ export interface GenerateImageOptions {
  */
 export interface GenerateImageResponse {
   /**
-   * The generated image as a base64-encoded string.
+   * Array of generated images as base64-encoded PNG strings.
    *
-   * This can be used directly in an img tag with a data URI.
+   * Each string contains raw base64 data (without data URI prefix).
+   * To use in an img tag, prefix with 'data:image/png;base64,'.
    *
    * @since 1.0.0
-   * @example 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUg...'
+   * @example ['iVBORw0KGgoAAAANSUhEUg...', 'iVBORw0KGgoAAAANSUhEUg...']
    */
   pngBase64Images: string[];
 }

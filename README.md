@@ -110,14 +110,14 @@ This is important for managing memory and preventing resource leaks.
 generateImage(options: GenerateImageOptions) => Promise<GenerateImageResponse>
 ```
 
-Generates an image from a text prompt using the on-device LLM.
+Generates images from a text prompt using the on-device LLM.
 
 Use this method to create images based on text descriptions. The generated
-image is returned as a base64-encoded string.
+images are returned as base64-encoded PNG strings in an array.
 
-| Param         | Type                                                                  | Description                                         |
-| ------------- | --------------------------------------------------------------------- | --------------------------------------------------- |
-| **`options`** | <code><a href="#generateimageoptions">GenerateImageOptions</a></code> | - The image generation options including the prompt |
+| Param         | Type                                                                  | Description                                                            |
+| ------------- | --------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| **`options`** | <code><a href="#generateimageoptions">GenerateImageOptions</a></code> | - The image generation options including the prompt and optional count |
 
 **Returns:** <code>Promise&lt;<a href="#generateimageresponse">GenerateImageResponse</a>&gt;</code>
 
@@ -182,19 +182,20 @@ Options for ending an active LLM session.
 
 Response containing the generated image data.
 
-| Prop                  | Type                  | Description                                                                                              | Since |
-| --------------------- | --------------------- | -------------------------------------------------------------------------------------------------------- | ----- |
-| **`pngBase64Images`** | <code>string[]</code> | The generated image as a base64-encoded string. This can be used directly in an img tag with a data URI. | 1.0.0 |
+| Prop                  | Type                  | Description                                                                                                                                                                          | Since |
+| --------------------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----- |
+| **`pngBase64Images`** | <code>string[]</code> | Array of generated images as base64-encoded PNG strings. Each string contains raw base64 data (without data URI prefix). To use in an img tag, prefix with 'data:image/png;base64,'. | 1.0.0 |
 
 
 #### GenerateImageOptions
 
 Options for generating an image from a text prompt.
 
-| Prop         | Type                | Description                                       | Since |
-| ------------ | ------------------- | ------------------------------------------------- | ----- |
-| **`prompt`** | <code>string</code> | The text prompt describing the image to generate. | 1.0.0 |
-| **`count`**  | <code>number</code> |                                                   |       |
+| Prop               | Type                  | Description                                                                 | Default        | Since |
+| ------------------ | --------------------- | --------------------------------------------------------------------------- | -------------- | ----- |
+| **`prompt`**       | <code>string</code>   | The text prompt describing the image to generate.                           |                | 1.0.0 |
+| **`promptImages`** | <code>string[]</code> |                                                                             |                |       |
+| **`count`**        | <code>number</code>   | The number of image variations to generate. Defaults to 1 if not specified. | <code>1</code> | 1.0.0 |
 
 
 ### Type Aliases

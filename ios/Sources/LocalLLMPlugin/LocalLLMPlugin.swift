@@ -55,9 +55,16 @@ public class LocalLLMPlugin: CAPPlugin, CAPBridgedPlugin {
             return
         }
         let count = call.getInt("count", 1)
+        let promptImages: [String] = call.getArray("promptImages")?.compactMap({ val in
+            return val as? String
+        }) ?? []
+      
+      
+      
 
         generateImageAsyncCallback(
             prompt: prompt,
+            promptImages: promptImages,
             count: count,
         ) { result in
             switch result {
@@ -87,6 +94,7 @@ public class LocalLLMPlugin: CAPPlugin, CAPBridgedPlugin {
 
     private func generateImageAsyncCallback(
         prompt: String,
+        promptImages: [String],
         count: Int,
         completion: @escaping @Sendable (Result<[String], Error>) -> Void
     ) {
@@ -94,6 +102,7 @@ public class LocalLLMPlugin: CAPPlugin, CAPBridgedPlugin {
             do {
                 let images = try await implementation.generateImage(
                     prompt: prompt,
+                    promptImages: promptImages,
                     variations: count
                 )
                 completion(.success(images))

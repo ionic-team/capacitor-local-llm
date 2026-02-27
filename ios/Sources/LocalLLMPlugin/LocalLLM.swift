@@ -95,7 +95,7 @@ public class LocalLLM {
         }
     }
 
-  func generateImage(prompt: String, variations: Int)
+  func generateImage(prompt: String, promptImages: [String], variations: Int)
     async throws -> [String] {
       if #available(iOS 18.4, *) {
         let creator = try await ImageCreator()
@@ -103,7 +103,17 @@ public class LocalLLM {
           throw LocalLLMError.unsupported
         }
         
-        let images = creator.images(for: [.text(prompt)], style: style, limit: variations)
+        var concept: [ImagePlaygroundConcept] = [
+          .text(prompt),
+        ]
+        
+        promptImages.compactMap { b64 in
+          return base64StringToCGImage(base64String: b64)
+        }.forEach { image in
+          concept.append(.image(image))
+        }
+        
+        let images = creator.images(for: concept, style: style, limit: variations)
         
         var imageData: [String] = []
         
@@ -118,6 +128,18 @@ public class LocalLLM {
         throw LocalLLMError.unsupported
       }
     }
+  
+  private func base64StringToCGImage(base64String: String) -> CGImage? {
+    let cleanedString = base64String.components(separatedBy: ",").last ?? base64String
+        
+    guard let data = Data(base64Encoded: cleanedString.trimmingCharacters(in: .whitespacesAndNewlines)) else { return nil }
+    
+    guard let source = CGImageSourceCreateWithData(data as CFData, nil) else {
+        return nil
+    }
+    
+    return CGImageSourceCreateImageAtIndex(source, 0, nil)
+  }
 }
 
 extension CGImage {
