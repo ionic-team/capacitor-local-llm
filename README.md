@@ -164,10 +164,10 @@ Options for sending a prompt to the LLM.
 
 Configuration options for LLM inference behavior.
 
-| Prop                       | Type                | Description                                                                                                                                                           | Since |
-| -------------------------- | ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
-| **`temperature`**          | <code>number</code> | Controls randomness in the model's output. Higher values (e.g., 0.8) make output more random, while lower values (e.g., 0.2) make it more focused and deterministic.  | 1.0.0 |
-| **`maximiumOutputTokens`** | <code>number</code> | The maximum number of tokens to generate in the response. Note: This property name contains a typo ("maximium" instead of "maximum") but is kept for API consistency. | 1.0.0 |
+| Prop                      | Type                | Description                                                                                                                                                          | Since |
+| ------------------------- | ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
+| **`temperature`**         | <code>number</code> | Controls randomness in the model's output. Higher values (e.g., 0.8) make output more random, while lower values (e.g., 0.2) make it more focused and deterministic. | 1.0.0 |
+| **`maximumOutputTokens`** | <code>number</code> | The maximum number of tokens to generate in the response. *                                                                                                          | 1.0.0 |
 
 
 #### EndSessionOptions

@@ -114,12 +114,11 @@ export interface LLMOptions {
   /**
    * The maximum number of tokens to generate in the response.
    *
-   * Note: This property name contains a typo ("maximium" instead of "maximum")
-   * but is kept for API consistency.
+   * On Android, this must be between 1 and 256.
    *
    * @since 1.0.0
    */
-  maximiumOutputTokens?: number;
+  maximumOutputTokens?: number;
 }
 
 /**

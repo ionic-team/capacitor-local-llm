@@ -13,7 +13,7 @@ public enum LLMAvailability: String, Sendable {
 
 public struct LLMOptions: Sendable {
     let temperature: Double?
-    let maximiumOutputTokens: Int?
+    let maximumOutputTokens: Int?
 }
 
 public struct LLMPromptOptions: Sendable {
@@ -81,7 +81,14 @@ public class LocalLLM {
                 throw LocalLLMError.responseInProgress
             }
 
-            let response = try await session.respond(to: options.prompt)
+            let response = try await session.respond(
+              to: options.prompt,
+              options: GenerationOptions(
+                sampling: nil,
+                temperature: options.options?.temperature,
+                maximumResponseTokens: options.options?.maximumOutputTokens
+              )
+            )
 
             return response.content
         }

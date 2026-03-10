@@ -129,7 +129,7 @@ public class LocalLLMPlugin: CAPPlugin, CAPBridgedPlugin {
 
         return LLMOptions(
             temperature: optionsObject["temperature"] as? Double,
-            maximiumOutputTokens: optionsObject["maximiumOutputTokens"] as? Int,
+            maximumOutputTokens: optionsObject["maximumOutputTokens"] as? Int,
             )
     }
 }

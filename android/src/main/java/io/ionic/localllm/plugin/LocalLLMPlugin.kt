@@ -107,7 +107,7 @@ class LocalLLMPlugin : Plugin() {
         if (optionsObject!= null) {
             return LLMOptions(
                 temperature = optionsObject.optDouble("temperature")?.toFloat(),
-                maxOutputTokens =  optionsObject.optInt("maximiumOutputTokens")
+                maxOutputTokens =  optionsObject.optInt("maximumOutputTokens").coerceIn(1, 256)
             )
         }
 
