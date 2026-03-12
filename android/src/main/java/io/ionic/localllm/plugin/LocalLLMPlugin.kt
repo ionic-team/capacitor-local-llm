@@ -39,6 +39,18 @@ class LocalLLMPlugin : Plugin() {
         }
     }
 
+    @PluginMethod
+    fun warmup(call: PluginCall) {
+        runBlocking {
+            try {
+                var impl = this@LocalLLMPlugin.implementation ?: throw Exception("LocalLLM not initialized")
+                impl.warmup()
+            } catch (ex: Exception) {
+                call.reject(ex.message)
+            }
+        }
+    }
+
   @PluginMethod
   fun prompt(call: PluginCall) {
       runBlocking {

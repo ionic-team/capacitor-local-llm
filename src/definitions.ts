@@ -77,6 +77,7 @@ export interface LocalLLMPlugin {
    * as base64-encoded PNG strings in an array.
    *
    * @since 1.0.0
+   * @platform ios
    * @example
    * ```typescript
    * // Generate 2 variations from a text prompt
@@ -93,6 +94,23 @@ export interface LocalLLMPlugin {
    * @returns A promise that resolves with an array of generated image data
    */
   generateImage(options: GenerateImageOptions): Promise<GenerateImageResponse>;
+
+  /**
+   * Warms up the on-device LLM for faster initial responses.
+   *
+   * Use this method to pre-initialize the LLM with a prompt prefix, reducing latency
+   * for the first actual prompt. This is useful when you know in advance the type of
+   * prompts you'll be sending.
+   *
+   * @since 1.0.0
+   * @example
+   * ```typescript
+   * await LocalLLM.warmup({ promptPrefix: 'You are a helpful assistant.' });
+   * ```
+   * @param options - The warmup options including the prompt prefix
+   * @returns A promise that resolves when warmup is complete
+   */
+  warmup(options: WarmupOptions): Promise<void>;
 }
 
 /**
@@ -265,4 +283,34 @@ export interface GenerateImageResponse {
    * @example ['iVBORw0KGgoAAAANSUhEUg...', 'iVBORw0KGgoAAAANSUhEUg...']
    */
   pngBase64Images: string[];
+}
+
+/**
+ * Options for warming up the on-device LLM.
+ *
+ * @since 1.0.0
+ */
+export interface WarmupOptions {
+  /**
+   * The session identifier for the warmup.
+   *
+   * This identifier will be associated with the warmed-up session,
+   * allowing you to use the same session for subsequent prompts.
+   *
+   * @since 1.0.0
+   * @platform ios
+   */
+  sessionId: string;
+
+  /**
+   * The prompt prefix to use for warming up the LLM.
+   *
+   * This text will be used to pre-initialize the model, reducing latency
+   * for subsequent prompts with similar prefixes.
+   *
+   * @since 1.0.0
+   * @platform ios
+   * @example 'You are a helpful assistant that provides concise answers.'
+   */
+  promptPrefix?: string;
 }

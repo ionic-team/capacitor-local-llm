@@ -8,6 +8,7 @@ import type {
   PromptResponse,
   LocalLLMPlugin,
   SystemAvailabilityResponse,
+  WarmupOptions,
 } from './definitions';
 
 export class LocalLLMWeb extends WebPlugin implements LocalLLMPlugin {
@@ -24,6 +25,9 @@ export class LocalLLMWeb extends WebPlugin implements LocalLLMPlugin {
     throw new Error('not available on the web.');
   }
   generateImage(_options: GenerateImageOptions): Promise<GenerateImageResponse> {
+    throw new Error('not available on the web.');
+  }
+  warmup(_options: WarmupOptions): Promise<void> {
     throw new Error('not available on the web.');
   }
 }

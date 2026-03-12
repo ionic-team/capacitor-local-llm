@@ -53,6 +53,10 @@ class LocalLLM(private val context: android.content.Context) {
         }
     }
 
+    suspend fun warmup() {
+        model.warmup()
+    }
+
     suspend fun prompt(options: LLMPromptOptions): String {
         val sessionId = options.sessionId
 
@@ -111,8 +115,7 @@ class LocalLLM(private val context: android.content.Context) {
         count: Int
     ): String {
         // TODO: Implement image generation using Android's on-device image generation APIs
-        // This is a stub implementation - fill in with actual image generation logic
-        // Return base64-encoded image string
+        // Return base64-encoded PNG image string
         throw NotImplementedError("Image generation not yet implemented for Android")
     }
 }
