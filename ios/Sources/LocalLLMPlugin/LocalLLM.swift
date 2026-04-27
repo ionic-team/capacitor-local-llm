@@ -61,7 +61,7 @@ public class LocalLLM {
 
   func warmup(sessionId: String, promptPrefix: String?) throws {
     if #available(iOS 26.0, *) {
-      let session = getOrCreateSession(sessionId: sessionId)
+      let session = getOrCreateSession(sessionId: sessionId, instructions: promptPrefix)
 
       session.prewarm(promptPrefix: .init(promptPrefix))
     } else {
