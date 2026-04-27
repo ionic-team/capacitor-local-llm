@@ -1,12 +1,112 @@
 # @capacitor/local-llm
 
-Capacitor Local LLM plugin
+Run large language models entirely on-device using Apple Intelligence (Foundation Models) on iOS and Gemini Nano on Android. No network requests, no API keys, no data leaving the device.
+
+> **Note:** On-device LLMs require physical hardware. Android emulators are not supported.  iOS simulators are supported so long as the host device is capable of running Apple Intelligence and has it enabled.
 
 ## Install
 
 ```bash
 npm install @capacitor/local-llm
 npx cap sync
+```
+
+## Platform Requirements
+
+| Platform | Minimum OS | Notes |
+|----------|------------|-------|
+| iOS | **18.4** | Image generation requires iOS 18.4+. Text LLM (Foundation Models / Apple Intelligence) requires iOS 26+. |
+| Android | **10 (API 29)** | Gemini Nano via ML Kit requires a device that supports on-device AI (e.g. Pixel 6+). |
+
+## iOS Setup
+
+No additional configuration is required. Foundation Models and Image Playground are system frameworks available automatically on supported devices with Apple Intelligence enabled.
+
+Call [`systemAvailability()`](#systemavailability) at runtime to check whether the model is ready before sending prompts.
+
+On iOS 18, `systemAvailability()` returns `'unavailable'` for the text LLM. If `prompt()` or `warmup()` are called anyway, the promise will reject with an error. Image generation via `generateImage()` is fully functional on iOS 18.4+.
+
+## Android Setup
+
+Gemini Nano is distributed via Google Play Services and must be downloaded to the device before use. The model is not bundled with your app.
+
+### Check availability and download
+
+Call [`systemAvailability()`](#systemavailability) to inspect the current state. If the status is `downloadable`, trigger the download with [`download()`](#download) and poll `systemAvailability()` until the status becomes `available`.
+
+```typescript
+import { LocalLLM } from '@capacitor/local-llm';
+
+const { status } = await LocalLLM.systemAvailability();
+
+if (status === 'downloadable') {
+  await LocalLLM.download();
+  // Poll systemAvailability() until status === 'available'
+}
+```
+
+## Usage
+
+### Basic prompt
+
+```typescript
+import { LocalLLM } from '@capacitor/local-llm';
+
+const { text } = await LocalLLM.prompt({
+  prompt: 'Summarize the theory of relativity in one paragraph.',
+});
+
+console.log(text);
+```
+
+### Multi-turn conversation
+
+Use a `sessionId` to maintain context across multiple prompts.
+
+```typescript
+import { LocalLLM } from '@capacitor/local-llm';
+
+const sessionId = 'my-chat-session';
+
+await LocalLLM.prompt({
+  sessionId,
+  instructions: 'You are a helpful assistant.',
+  prompt: 'What is the capital of France?',
+});
+
+const { text } = await LocalLLM.prompt({
+  sessionId,
+  prompt: 'What is the population of that city?',
+});
+
+// Clean up when done
+await LocalLLM.endSession({ sessionId });
+```
+
+### Reduce first-response latency with warmup
+
+```typescript
+import { LocalLLM } from '@capacitor/local-llm';
+
+// Pre-initialize the model before the user starts typing
+await LocalLLM.warmup({
+  sessionId: 'my-session',
+  promptPrefix: 'You are a customer support agent for Acme Corp.',
+});
+```
+
+### Image generation (iOS only)
+
+```typescript
+import { LocalLLM } from '@capacitor/local-llm';
+
+const { pngBase64Images } = await LocalLLM.generateImage({
+  prompt: 'A serene mountain lake at sunrise, photorealistic',
+  count: 2,
+});
+
+// Use directly in an <img> tag
+const src = `data:image/png;base64,${pngBase64Images[0]}`;
 ```
 
 ## API
@@ -18,6 +118,7 @@ npx cap sync
 * [`prompt(...)`](#prompt)
 * [`endSession(...)`](#endsession)
 * [`generateImage(...)`](#generateimage)
+* [`warmup(...)`](#warmup)
 * [Interfaces](#interfaces)
 * [Type Aliases](#type-aliases)
 
@@ -127,6 +228,27 @@ as base64-encoded PNG strings in an array.
 --------------------
 
 
+### warmup(...)
+
+```typescript
+warmup(options: WarmupOptions) => Promise<void>
+```
+
+Warms up the on-device LLM for faster initial responses.
+
+Use this method to pre-initialize the LLM with a prompt prefix, reducing latency
+for the first actual prompt. This is useful when you know in advance the type of
+prompts you'll be sending.
+
+| Param         | Type                                                    | Description                                      |
+| ------------- | ------------------------------------------------------- | ------------------------------------------------ |
+| **`options`** | <code><a href="#warmupoptions">WarmupOptions</a></code> | - The warmup options including the prompt prefix |
+
+**Since:** 1.0.0
+
+--------------------
+
+
 ### Interfaces
 
 
@@ -167,7 +289,7 @@ Configuration options for LLM inference behavior.
 | Prop                      | Type                | Description                                                                                                                                                          | Since |
 | ------------------------- | ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
 | **`temperature`**         | <code>number</code> | Controls randomness in the model's output. Higher values (e.g., 0.8) make output more random, while lower values (e.g., 0.2) make it more focused and deterministic. | 1.0.0 |
-| **`maximumOutputTokens`** | <code>number</code> | The maximum number of tokens to generate in the response. *                                                                                                          | 1.0.0 |
+| **`maximumOutputTokens`** | <code>number</code> | The maximum number of tokens to generate in the response. On Android, this must be between 1 and 256.                                                                | 1.0.0 |
 
 
 #### EndSessionOptions
@@ -197,6 +319,16 @@ Options for generating an image from a text prompt.
 | **`prompt`**       | <code>string</code>   | The text prompt describing the image to generate.                                                                                                                                                                                                                                                        |                | 1.0.0 |
 | **`promptImages`** | <code>string[]</code> | Optional array of reference images to influence the generated output. Provide base64-encoded image strings (with or without data URI prefix) that will be used as visual context or inspiration for the image generation. This allows you to combine text and image concepts for more controlled output. |                | 1.0.0 |
 | **`count`**        | <code>number</code>   | The number of image variations to generate. Defaults to 1 if not specified.                                                                                                                                                                                                                              | <code>1</code> | 1.0.0 |
+
+
+#### WarmupOptions
+
+Options for warming up the on-device LLM.
+
+| Prop               | Type                | Description                                                                                                                                                         | Since |
+| ------------------ | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
+| **`sessionId`**    | <code>string</code> | The session identifier for the warmup. This identifier will be associated with the warmed-up session, allowing you to use the same session for subsequent prompts.  | 1.0.0 |
+| **`promptPrefix`** | <code>string</code> | The prompt prefix to use for warming up the LLM. This text will be used to pre-initialize the model, reducing latency for subsequent prompts with similar prefixes. | 1.0.0 |
 
 
 ### Type Aliases

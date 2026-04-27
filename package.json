@@ -15,7 +15,7 @@
     "Package.swift",
     "CapacitorLocalLlm.podspec"
   ],
-  "author": "Joseph Pender",
+  "author": "Ionic <hi@ionicframework.com>",
   "license": "MIT",
   "repository": {
     "type": "git",
