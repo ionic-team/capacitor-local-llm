@@ -1,8 +1,12 @@
 ## Project Overview
 Capacitor Local LLM is a Capacitor plugin that wraps on-device LLM functionality on iOS and Android.
-- iOS uses on-device Foundation Models introduced in iOS 26 (a very new API — avoid assumptions about its behavior; prefer checking Apple docs)
+- iOS uses Foundation Models (Apple Intelligence) for text LLM (iOS 26+) and Image Playground for image generation (iOS 18.4+). Foundation Models is a new API — avoid assumptions about its behavior; prefer checking Apple docs.
 - Android uses on-device Gemini Nano via the ML Kit packages
 - Web is unsupported — plugin methods should throw a "not implemented" error on Web
+
+## Platform Requirements
+- iOS: minimum **18.4**. Image generation works on iOS 18.4+. Text LLM (Foundation Models) requires iOS 26+.
+- Android: minimum **API 29** (Android 10). Do not lower these — they reflect hard requirements of the underlying native APIs.
 
 ## Tech Stack
 - This package is a Capacitor plugin, as well as an SPM and CocoaPods package
@@ -45,9 +49,10 @@ This plugin follows standard Capacitor conventions:
   2. `src/web.ts` — Web stub (throw `unimplemented()`)
   3. iOS Swift plugin class
   4. Android Kotlin plugin class
+- iOS methods that require iOS 26+ must be wrapped in `#available(iOS 26.0, *)` guards and throw `LocalLLMError.unsupported` in the `else` branch. Do not assume a feature is available just because the deployment target allows the code to compile.
 
 ## Running the Example App
-Note: on-device LLMs cannot run in simulators or emulators — a physical device is required.
+Note: Android emulators are not supported — Gemini Nano requires a physical Android device. iOS simulators are supported as long as the host Mac supports Apple Intelligence and has it enabled.
 ```bash
 cd example-app
 npm install
@@ -60,7 +65,7 @@ ionic cap sync
 - All TypeScript interfaces, types, and functions intended for public API consumption should be documented using JSDoc comments, including:
   - The version the feature was introduced (`@since`)
   - A one-line usage example
-  - Platform availability for platform-exclusive features (e.g., `@platform ios`)
+  - Platform availability for platform-exclusive features — note this in prose within the JSDoc description, as Capacitor's docgen does not recognize a `@platform` tag
 - New functionality should be added for all platforms unless unavailable due to platform limitations. Platform-exclusive features must be noted in documentation.
 
 ## Testing
@@ -68,6 +73,7 @@ ionic cap sync
 - When making changes, test on both iOS and Android physical devices before considering work complete.
 
 ## Things to Avoid
-- Do not attempt to run or test using simulators or emulators — on-device LLMs require physical hardware.
+- Do not attempt to run or test Android using emulators — Gemini Nano requires physical hardware. iOS simulators work with caveats (see Running the Example App above).
 - Avoid adding new dependencies where possible. If a dependency is needed, flag it for review before adding.
-- Do not make assumptions about Foundation Models API behavior — it is new in iOS 26 and documentation may be limited.
+- Do not make assumptions about Foundation Models API behavior — it is a new API and documentation may be limited.
+- Do not lower the minimum platform versions (iOS 18.4 / Android API 29) — they are set to match the minimum requirements of the underlying native APIs.
