@@ -18,16 +18,16 @@ export class LocalLLMWeb extends WebPlugin implements LocalLLMPlugin {
   download(): Promise<void> {
     throw new Error('not available on the web.');
   }
-  prompt(_options: PromptOptions): Promise<PromptResponse> {
+  prompt(): Promise<PromptResponse> {
     throw new Error('not available on the web.');
   }
-  endSession(_options: EndSessionOptions): Promise<void> {
+  endSession(): Promise<void> {
     throw new Error('not available on the web.');
   }
-  generateImage(_options: GenerateImageOptions): Promise<GenerateImageResponse> {
+  generateImage(): Promise<GenerateImageResponse> {
     throw new Error('not available on the web.');
   }
-  warmup(_options: WarmupOptions): Promise<void> {
+  warmup(): Promise<void> {
     throw new Error('not available on the web.');
   }
 }
