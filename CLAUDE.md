@@ -5,7 +5,7 @@ Capacitor Local LLM is a Capacitor plugin that wraps on-device LLM functionality
 - Web is unsupported — plugin methods should throw a "not implemented" error on Web
 
 ## Platform Requirements
-- iOS: minimum **18.4**. Image generation works on iOS 18.4+. Text LLM (Foundation Models) requires iOS 26+.
+- iOS: minimum **15**. Image generation works on iOS 18.4+. Text LLM (Foundation Models) requires iOS 26+.
 - Android: minimum **API 29** (Android 10). Do not lower these — they reflect hard requirements of the underlying native APIs.
 
 ## Tech Stack
@@ -76,4 +76,4 @@ ionic cap sync
 - Do not attempt to run or test Android using emulators — Gemini Nano requires physical hardware. iOS simulators work with caveats (see Running the Example App above).
 - Avoid adding new dependencies where possible. If a dependency is needed, flag it for review before adding.
 - Do not make assumptions about Foundation Models API behavior — it is a new API and documentation may be limited.
-- Do not lower the minimum platform versions (iOS 18.4 / Android API 29) — they are set to match the minimum requirements of the underlying native APIs.
+- Do not lower the minimum platform versions (iOS 15 / Android API 29) — they are set to match the minimum requirements of the underlying native APIs.

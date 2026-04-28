@@ -15,7 +15,7 @@ npx cap sync
 
 | Platform | Minimum OS | Notes |
 |----------|------------|-------|
-| iOS | **18.4** | Image generation requires iOS 18.4+. Text LLM (Foundation Models / Apple Intelligence) requires iOS 26+. |
+| iOS | **15** | Image generation requires iOS 18.4+. Text LLM (Foundation Models / Apple Intelligence) requires iOS 26+. |
 | Android | **10 (API 29)** | Gemini Nano via ML Kit requires a device that supports on-device AI (e.g. Pixel 6+). |
 
 ## iOS Setup
@@ -44,6 +44,23 @@ if (status === 'downloadable') {
   // Poll systemAvailability() until status === 'available'
 }
 ```
+
+## Platform Limitations
+
+### iOS
+
+- **Text LLM requires iOS 26 and Apple Intelligence.** On iOS 18, `systemAvailability()` returns `'unavailable'` for the text LLM and `prompt()` / `warmup()` will reject.
+- **`download()` is not available on iOS.** The model is managed by the OS; use `systemAvailability()` to check readiness.
+- **Context limit is 4096 tokens.** This applies to the combined length of system instructions, conversation history, and the current prompt.
+
+### Android
+
+- **`maximumOutputTokens` is clamped to 1–256** by the ML Kit API. Values outside this range will be coerced.
+- **Multi-turn session context is managed in-memory** by manually assembling conversation history into each prompt. It is not a native session API and does not persist across app restarts.
+- **`warmup()` ignores `sessionId` and `promptPrefix`** on Android — it warms up the model globally.
+- **Not all Android 10+ devices support Gemini Nano.** The device must have a compatible on-device AI chip (e.g. Pixel 6 and later).
+- **On-device models cannot be used while the app is in the background.** Inference requests made while the app is backgrounded will fail.
+- **AICore enforces an inference quota per app.** Making too many requests in a short period will result in an `ErrorCode.BUSY` response — consider exponential backoff when retrying. An `ErrorCode.PER_APP_BATTERY_USE_QUOTA_EXCEEDED` error can be returned if an app exceeds a longer-duration quota (e.g. a daily limit).
 
 ## Usage
 
