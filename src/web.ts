@@ -1,15 +1,6 @@
 import { WebPlugin } from '@capacitor/core';
 
-import type {
-  EndSessionOptions,
-  GenerateImageOptions,
-  GenerateImageResponse,
-  PromptOptions,
-  PromptResponse,
-  LocalLLMPlugin,
-  SystemAvailabilityResponse,
-  WarmupOptions,
-} from './definitions';
+import type { GenerateImageResponse, PromptResponse, LocalLLMPlugin, SystemAvailabilityResponse } from './definitions';
 
 export class LocalLLMWeb extends WebPlugin implements LocalLLMPlugin {
   systemAvailability(): Promise<SystemAvailabilityResponse> {
