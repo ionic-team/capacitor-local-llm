@@ -1,5 +1,8 @@
 # @capacitor/local-llm
 
+> [!WARNING]  
+> CapacitorLABS - This project is experimental. Support is not provided. Please open issues when needed.
+
 Run large language models entirely on-device using Apple Intelligence (Foundation Models) on iOS and Gemini Nano on Android. No network requests, no API keys, no data leaving the device.
 
 > **Note:** On-device LLMs require physical hardware. Android emulators are not supported.  iOS simulators are supported so long as the host device is capable of running Apple Intelligence and has it enabled.
