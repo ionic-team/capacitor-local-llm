@@ -1,4 +1,4 @@
-import { PluginListenerHandle } from '@capacitor/core';
+import type { PluginListenerHandle } from '@capacitor/core';
 
 /**
  * The main plugin interface for interacting with on-device LLMs.
