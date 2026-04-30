@@ -63,7 +63,7 @@ if (status === 'downloadable') {
 - **`warmup()` ignores `sessionId` and `promptPrefix`** on Android — it warms up the model globally.
 - **Not all Android 10+ devices support Gemini Nano.** The device must have a compatible on-device AI chip (e.g. Pixel 6 and later).
 - **On-device models cannot be used while the app is in the background.** Inference requests made while the app is backgrounded will fail.
-- **AICore enforces an inference quota per app.** Making too many requests in a short period will result in an `ErrorCode.BUSY` response — consider exponential backoff when retrying. An `ErrorCode.PER_APP_BATTERY_USE_QUOTA_EXCEEDED` error can be returned if an app exceeds a longer-duration quota (e.g. a daily limit).
+- **AICore enforces an inference quota per app.** Making too many requests in a short period will result in an `BUSY` error response — consider exponential backoff when retrying. An `PER_APP_BATTERY_USE_QUOTA_EXCEEDED` error can be returned if an app exceeds a longer-duration quota (e.g. a daily limit).
 
 ## Usage
 
@@ -139,6 +139,8 @@ const src = `data:image/png;base64,${pngBase64Images[0]}`;
 * [`endSession(...)`](#endsession)
 * [`generateImage(...)`](#generateimage)
 * [`warmup(...)`](#warmup)
+* [`addListener('systemAvailabilityChange', ...)`](#addlistenersystemavailabilitychange-)
+* [`removeAllListeners()`](#removealllisteners)
 * [Interfaces](#interfaces)
 * [Type Aliases](#type-aliases)
 
@@ -269,6 +271,39 @@ prompts you'll be sending.
 --------------------
 
 
+### addListener('systemAvailabilityChange', ...)
+
+```typescript
+addListener(eventName: 'systemAvailabilityChange', listenerFunc: SystemAvailabilityChangeListener) => Promise<PluginListenerHandle>
+```
+
+Registers a listener that is called whenever the on-device LLM availability status changes.
+
+The listener is invoked with the new availability status each time it changes. Polling
+begins when the first listener is added and stops when all listeners are removed via
+`removeAllListeners()`.
+
+| Param              | Type                                                                                          | Description                                                            |
+| ------------------ | --------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| **`eventName`**    | <code>'systemAvailabilityChange'</code>                                                       | - The event name to listen for                                         |
+| **`listenerFunc`** | <code><a href="#systemavailabilitychangelistener">SystemAvailabilityChangeListener</a></code> | - The callback invoked with the new availability status on each change |
+
+**Returns:** <code>Promise&lt;<a href="#pluginlistenerhandle">PluginListenerHandle</a>&gt;</code>
+
+**Since:** 1.0.0
+
+--------------------
+
+
+### removeAllListeners()
+
+```typescript
+removeAllListeners() => Promise<void>
+```
+
+--------------------
+
+
 ### Interfaces
 
 
@@ -351,6 +386,13 @@ Options for warming up the on-device LLM.
 | **`promptPrefix`** | <code>string</code> | The prompt prefix to use for warming up the LLM. This text will be used to pre-initialize the model, reducing latency for subsequent prompts with similar prefixes. | 1.0.0 |
 
 
+#### PluginListenerHandle
+
+| Prop         | Type                                      |
+| ------------ | ----------------------------------------- |
+| **`remove`** | <code>() =&gt; Promise&lt;void&gt;</code> |
+
+
 ### Type Aliases
 
 
@@ -359,5 +401,12 @@ Options for warming up the on-device LLM.
 Availability status of the on-device LLM.
 
 <code>'available' | 'unavailable' | 'notready' | 'downloadable' | 'responding'</code>
+
+
+#### SystemAvailabilityChangeListener
+
+Callback invoked when the on-device LLM availability status changes.
+
+<code>(availability: <a href="#llmavailability">LLMAvailability</a>): void</code>
 
 </docgen-api>

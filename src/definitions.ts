@@ -1,3 +1,5 @@
+import { PluginListenerHandle } from '@capacitor/core';
+
 /**
  * The main plugin interface for interacting with on-device LLMs.
  *
@@ -111,7 +113,43 @@ export interface LocalLLMPlugin {
    * @returns A promise that resolves when warmup is complete
    */
   warmup(options: WarmupOptions): Promise<void>;
+
+  /**
+   * Registers a listener that is called whenever the on-device LLM availability status changes.
+   *
+   * The listener is invoked with the new availability status each time it changes. Polling
+   * begins when the first listener is added and stops when all listeners are removed via
+   * `removeAllListeners()`.
+   *
+   * @since 1.0.0
+   * @example
+   * ```typescript
+   * const handle = await LocalLLM.addListener('systemAvailabilityChange', (status) => {
+   *   console.log('LLM availability changed:', status);
+   * });
+   *
+   * // Later, to stop listening:
+   * await handle.remove();
+   * ```
+   * @param eventName - The event name to listen for
+   * @param listenerFunc - The callback invoked with the new availability status on each change
+   * @returns A handle that can be used to remove this specific listener
+   */
+  addListener(
+    eventName: 'systemAvailabilityChange',
+    listenerFunc: SystemAvailabilityChangeListener,
+  ): Promise<PluginListenerHandle>;
+
+  removeAllListeners(): Promise<void>;
 }
+
+/**
+ * Callback invoked when the on-device LLM availability status changes.
+ *
+ * @since 1.0.0
+ * @param availability - The new availability status of the LLM
+ */
+export type SystemAvailabilityChangeListener = (availability: LLMAvailability) => void;
 
 /**
  * Configuration options for LLM inference behavior.

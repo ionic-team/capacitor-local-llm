@@ -18,6 +18,43 @@ public class LocalLLMPlugin: CAPPlugin, CAPBridgedPlugin {
   ]
 
   private let implementation = LocalLLM()
+  private var availabilityPollingTask: Task<Void, Never>?
+
+  override public func load() {
+
+  }
+
+  @objc public override func addListener(_ call: CAPPluginCall) {
+    super.addListener(call)
+    if call.getString("eventName") == "systemAvailabilityChange" {
+      startAvailabilityPolling()
+    }
+  }
+
+  @objc public override func removeAllListeners(_ call: CAPPluginCall) {
+    super.removeAllListeners(call)
+    stopAvailabilityPolling()
+  }
+
+  private func startAvailabilityPolling() {
+    guard availabilityPollingTask == nil else { return }
+    availabilityPollingTask = Task {
+      var lastAvailability: LLMAvailability? = nil
+      while !Task.isCancelled {
+        let current = LocalLLM.availability()
+        if current != lastAvailability {
+          lastAvailability = current
+          notifyListeners("systemAvailabilityChange", data: ["status": current.rawValue])
+        }
+        try? await Task.sleep(nanoseconds: 2_000_000_000)
+      }
+    }
+  }
+
+  private func stopAvailabilityPolling() {
+    availabilityPollingTask?.cancel()
+    availabilityPollingTask = nil
+  }
 
   @objc func systemAvailability(_ call: CAPPluginCall) {
     call.resolve([
