@@ -192,7 +192,7 @@ const Tab2: React.FC = () => {
               <div className="loading">
                 <IonSpinner></IonSpinner>
               </div>
-          ) : null}
+          ) : response}
 
           {generatedImages.length == 0 && (
             <small>None</small>

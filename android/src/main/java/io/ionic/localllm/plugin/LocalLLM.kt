@@ -24,7 +24,7 @@ class LocalLLM(private val context: android.content.Context) {
             FeatureStatus.UNAVAILABLE -> {
                 return LLMAvailability.Unavailable
             }
-            FeatureStatus.DOWNLOADABLE ->{
+            FeatureStatus.DOWNLOADABLE -> {
                 return LLMAvailability.Downloadable
             }
             FeatureStatus.DOWNLOADING -> {
@@ -58,6 +58,8 @@ class LocalLLM(private val context: android.content.Context) {
     }
 
     suspend fun prompt(options: LLMPromptOptions): String {
+        this.checkAvailability()
+
         val sessionId = options.sessionId
 
         val fullPrompt = if (sessionId != null) {
@@ -116,6 +118,22 @@ class LocalLLM(private val context: android.content.Context) {
     ): String {
         // TODO: Implement image generation using Android's on-device image generation APIs
         // Return base64-encoded PNG image string
-        throw NotImplementedError("Image generation not yet implemented for Android")
+        throw LocalLLMError.Unsupported()
+    }
+
+    private suspend fun checkAvailability() {
+        val availability = availability()
+
+        if (availability == LLMAvailability.Downloadable) {
+            throw LocalLLMError.Unavailable("model must be downloaded using 'download()'")
+        }
+
+        if (availability == LLMAvailability.NotReady) {
+            throw LocalLLMError.Unavailable("model is still downloading")
+        }
+
+        if (availability == LLMAvailability.Unavailable) {
+            throw LocalLLMError.Unsupported()
+        }
     }
 }

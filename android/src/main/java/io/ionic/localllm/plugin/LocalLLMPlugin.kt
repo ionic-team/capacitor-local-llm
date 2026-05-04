@@ -68,7 +68,7 @@ class LocalLLMPlugin : Plugin() {
   @PluginMethod fun systemAvailability(call: PluginCall) {
       runBlocking {
           try {
-              val impl = this@LocalLLMPlugin.implementation ?: throw Exception("LocalLLM not initialized")
+              val impl = this@LocalLLMPlugin.implementation ?: throw LocalLLMError.Uninitialized()
               call.resolve(JSObject().put("status", impl.availability().value))
           } catch (ex: Exception) {
               call.reject(ex.message)
@@ -79,7 +79,7 @@ class LocalLLMPlugin : Plugin() {
     @PluginMethod fun download(call: PluginCall) {
         runBlocking {
             try {
-                val impl = this@LocalLLMPlugin.implementation ?: throw Exception("LocalLLM not initialized")
+                val impl = this@LocalLLMPlugin.implementation ?: throw LocalLLMError.Uninitialized()
                 impl.download()
                 call.resolve()
             } catch (ex: Exception) {
@@ -92,7 +92,7 @@ class LocalLLMPlugin : Plugin() {
     fun warmup(call: PluginCall) {
         runBlocking {
             try {
-                var impl = this@LocalLLMPlugin.implementation ?: throw Exception("LocalLLM not initialized")
+                var impl = this@LocalLLMPlugin.implementation ?: throw LocalLLMError.Uninitialized()
                 impl.warmup()
             } catch (ex: Exception) {
                 call.reject(ex.message)
@@ -106,7 +106,7 @@ class LocalLLMPlugin : Plugin() {
           try {
               val options = getLLMPromptOptionsFromCall(call)
 
-              val impl = this@LocalLLMPlugin.implementation ?: throw Exception("LocalLLM not initialized")
+              val impl = this@LocalLLMPlugin.implementation ?: throw LocalLLMError.Uninitialized()
               val response = impl.prompt(options)
               call.resolve(JSObject().put("text", response))
           } catch (ex: Exception) {
@@ -127,7 +127,7 @@ class LocalLLMPlugin : Plugin() {
 
                 val count = call.getInt("count", 1) ?: 1
 
-                val impl = this@LocalLLMPlugin.implementation ?: throw Exception("LocalLLM not initialized")
+                val impl = this@LocalLLMPlugin.implementation ?: throw LocalLLMError.Uninitialized()
                 val base64Image = impl.generateImage(prompt, count)
                 call.resolve(JSObject().put("base64Image", base64Image))
             } catch (ex: Exception) {
@@ -145,7 +145,7 @@ class LocalLLMPlugin : Plugin() {
                 return
             }
 
-            val impl = this@LocalLLMPlugin.implementation ?: throw Exception("LocalLLM not initialized")
+            val impl = this@LocalLLMPlugin.implementation ?: throw LocalLLMError.Uninitialized()
             impl.endSession(sessionId)
             call.resolve()
         } catch (ex: Exception) {
