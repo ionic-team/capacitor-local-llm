@@ -1,23 +1,42 @@
 import { useState } from 'react';
-import { IonButton, IonContent, IonHeader, IonPage, IonSpinner, IonTextarea, IonTitle, IonToolbar } from '@ionic/react';
+import {
+  IonButton,
+  IonChip,
+  IonContent,
+  IonHeader,
+  IonLabel,
+  IonPage,
+  IonSpinner,
+  IonTextarea,
+  IonTitle,
+  IonToolbar,
+} from '@ionic/react';
 import { LocalLLM } from "@capacitor/local-llm";
 
 import './Tab1.css';
 
+const statusColor = (status: string): string => {
+  switch (status) {
+    case 'available': return 'success';
+    case 'unavailable': return 'danger';
+    case 'notready':
+    case 'downloadable': return 'warning';
+    default: return 'medium';
+  }
+};
 
 const Tab1: React.FC = () => {
-  const [systemStatus, setSystemStatus] = useState<string>("---");
+  const [systemStatus, setSystemStatus] = useState<string | null>(null);
   const [prompt, setPrompt] = useState<string>("What is an LLM?");
   const [sessionId, setSessionId] = useState<string>("");
-  const [response, setResponse] = useState<string>("---");
+  const [response, setResponse] = useState<string | null>(null);
   const [awaitingResponse, setAwaitingResponse] = useState<boolean>(false);
 
   const onStatusBtn = async () => {
     try {
       const res = await LocalLLM.systemAvailability();
       setSystemStatus(res.status);
-
-      if (res.status == 'downloadable') {
+      if (res.status === 'downloadable') {
         onDownloadingModel();
       }
     } catch (err) {
@@ -33,42 +52,32 @@ const Tab1: React.FC = () => {
           const res = await LocalLLM.systemAvailability();
           setSystemStatus(res.status);
         } catch (err) {
-          if (interval) {
-            clearInterval(interval);
-          }
+          if (interval) clearInterval(interval);
           setResponse((err as Error).message);
         }
       }, 1000);
       await LocalLLM.download();
       clearInterval(interval);
     } catch (err) {
-      if (interval) {
-        clearInterval(interval)
-      }
+      if (interval) clearInterval(interval);
       setResponse((err as Error).message);
     }
-  }
+  };
 
   const onPromptBtn = async () => {
     setAwaitingResponse(true);
-
-    let promptSessionId: string | undefined = sessionId;
-    if (promptSessionId == "") {
-      promptSessionId = undefined;
-    }
+    setResponse(null);
 
     try {
       const res = await LocalLLM.prompt({
         prompt,
-        sessionId: promptSessionId
+        sessionId: sessionId || undefined,
       });
-
-      setAwaitingResponse(false);
-
       setResponse(res.text);
     } catch (err: unknown) {
-      setAwaitingResponse(false);
       setResponse((err as Error).message);
+    } finally {
+      setAwaitingResponse(false);
     }
   };
 
@@ -89,39 +98,38 @@ const Tab1: React.FC = () => {
           <IonButton expand="block" onClick={onStatusBtn}>
             Check Status
           </IonButton>
-          <code>{systemStatus}</code>
+          {systemStatus && (
+            <IonChip color={statusColor(systemStatus)}>
+              <IonLabel>{systemStatus}</IonLabel>
+            </IonChip>
+          )}
 
           <IonTextarea
-            label="Enter a Session ID (optional)"
+            fill="outline"
+            labelPlacement="floating"
+            label="Session ID (optional)"
             value={sessionId}
-            onChange={(e) => {
-              setSessionId(e.currentTarget.value ?? "");
-            }}
-          ></IonTextarea>
+            onIonInput={(e) => setSessionId(e.detail.value ?? "")}
+          />
 
           <IonTextarea
-            label="Enter a Prompt"
+            fill="outline"
+            labelPlacement="floating"
+            label="Prompt"
             value={prompt}
-            onChange={(e) => {
-              setPrompt(e.currentTarget.value ?? "");
-            }}
-          ></IonTextarea>
-          <IonButton
-            disabled={awaitingResponse}
-            expand="block"
-            onClick={onPromptBtn}
-          >
-            Prompt
+            onIonInput={(e) => setPrompt(e.detail.value ?? "")}
+          />
+
+          <IonButton expand="block" disabled={awaitingResponse} onClick={onPromptBtn}>
+            Send Prompt
           </IonButton>
-          <code>
-            {awaitingResponse ? (
-              <div className="loading">
-                <IonSpinner></IonSpinner>
-              </div>
-            ) : (
-              response
-            )}
-          </code>
+
+          {awaitingResponse && (
+            <div className="loading">
+              <IonSpinner />
+            </div>
+          )}
+          {response && <p className="response">{response}</p>}
         </div>
       </IonContent>
     </IonPage>
