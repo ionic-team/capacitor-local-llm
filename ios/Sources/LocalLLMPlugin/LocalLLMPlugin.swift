@@ -20,10 +20,6 @@ public class LocalLLMPlugin: CAPPlugin, CAPBridgedPlugin {
     private let implementation = LocalLLM()
     private var availabilityPollingTask: Task<Void, Never>?
 
-    override public func load() {
-
-    }
-
     @objc override public func addListener(_ call: CAPPluginCall) {
         super.addListener(call)
         if call.getString("eventName") == "systemAvailabilityChange" {

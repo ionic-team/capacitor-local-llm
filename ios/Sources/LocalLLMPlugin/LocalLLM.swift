@@ -24,9 +24,10 @@ public struct LLMPromptOptions: Sendable {
 }
 
 public enum LocalLLMError: Error {
+    case uninitialized
     case responseInProgress
-    case sessionNotFound
     case unsupported
+    case unavailable(reason: String)
 }
 
 public class LocalLLM {
@@ -61,6 +62,7 @@ public class LocalLLM {
 
     func warmup(sessionId: String, promptPrefix: String?) throws {
         if #available(iOS 26.0, *) {
+            try checkAvailabilty()
             let session = getOrCreateSession(sessionId: sessionId, instructions: promptPrefix)
 
             session.prewarm(promptPrefix: .init(promptPrefix))
@@ -71,6 +73,8 @@ public class LocalLLM {
 
     func prompt(options: LLMPromptOptions) async throws -> String {
         if #available(iOS 26.0, *) {
+            try checkAvailabilty()
+          
             let session: LanguageModelSession
 
             if let sessionId = options.sessionId {
@@ -168,6 +172,18 @@ public class LocalLLM {
         }
 
         return CGImageSourceCreateImageAtIndex(source, 0, nil)
+    }
+  
+    private func checkAvailabilty() throws {
+      let status = LocalLLM.availability()
+      
+      if status == .notReady {
+        throw LocalLLMError.unavailable(reason: "model is not ready")
+      }
+      
+      if status == .unavailable {
+        throw LocalLLMError.unavailable(reason: "Apple Intelligence is not supported on this device or is not enabled")
+      }
     }
 }
 
