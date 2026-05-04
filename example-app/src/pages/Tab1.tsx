@@ -13,11 +13,15 @@ const Tab1: React.FC = () => {
   const [awaitingResponse, setAwaitingResponse] = useState<boolean>(false);
 
   const onStatusBtn = async () => {
-    const res = await LocalLLM.systemAvailability();
-    setSystemStatus(res.status);
+    try {
+      const res = await LocalLLM.systemAvailability();
+      setSystemStatus(res.status);
 
-    if (res.status == 'downloadable') {
-      onDownloadingModel();
+      if (res.status == 'downloadable') {
+        onDownloadingModel();
+      }
+    } catch (err) {
+      setResponse((err as Error).message);
     }
   };
 
@@ -25,8 +29,15 @@ const Tab1: React.FC = () => {
     let interval: NodeJS.Timeout | null = null;
     try {
       interval = setInterval(async () => {
-        const res = await LocalLLM.systemAvailability();
-        setSystemStatus(res.status);
+        try {
+          const res = await LocalLLM.systemAvailability();
+          setSystemStatus(res.status);
+        } catch (err) {
+          if (interval) {
+            clearInterval(interval);
+          }
+          setResponse((err as Error).message);
+        }
       }, 1000);
       await LocalLLM.download();
       clearInterval(interval);
