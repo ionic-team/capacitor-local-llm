@@ -26,7 +26,7 @@ android {
     namespace "io.ionic.localllm.plugin"
     compileSdk project.hasProperty('compileSdkVersion') ? rootProject.ext.compileSdkVersion : 35
     defaultConfig {
-        minSdkVersion 26
+        minSdkVersion 29
         targetSdkVersion project.hasProperty('targetSdkVersion') ? rootProject.ext.targetSdkVersion : 35
         versionCode 1
         versionName "1.0"
@@ -59,7 +59,7 @@ repositories {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation project(':capacitor-android')
-    implementation("com.google.mlkit:genai-prompt:1.0.0-beta1")
+    implementation("com.google.mlkit:genai-prompt:1.0.0-beta2")
     implementation "androidx.appcompat:appcompat:$androidxAppCompatVersion"
     implementation 'androidx.core:core-ktx:1.16.0'
     testImplementation "junit:junit:$junitVersion"

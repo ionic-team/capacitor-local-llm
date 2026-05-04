@@ -1,0 +1,30 @@
+name: 'Test Pull Request'
+
+on: pull_request
+
+jobs:
+  commitlint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Install commitlint
+        run: npm install -D @commitlint/cli @commitlint/config-conventional
+      - name: Validate pull request title
+        if: github.event_name == 'pull_request'
+        run: echo "${{ github.event.pull_request.title }}" | npx commitlint --verbose
+  verify:
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: 'npm'
+      - run: npm ci
+      - run: |
+          npm run lint
+          npm run verify
