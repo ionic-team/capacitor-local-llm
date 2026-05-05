@@ -324,6 +324,59 @@ export interface GenerateImageResponse {
 }
 
 /**
+ * Named error codes for LocalLLM plugin errors.
+ *
+ * These codes are included on errors thrown by the plugin across all platforms,
+ * accessible via `error.code` in catch blocks.
+ *
+ * @since 1.0.0
+ */
+export type LocalLLMErrorCode =
+  /** The current OS version or device hardware does not support on-device LLMs. */
+  | 'LOCAL_LLM_UNSUPPORTED_PLATFORM'
+  /** The on-device AI feature is supported but has not been enabled by the user (e.g. Apple Intelligence). */
+  | 'LOCAL_LLM_NOT_ENABLED'
+  /** The model exists on the device but is still downloading or initializing. */
+  | 'LOCAL_LLM_NOT_READY'
+  /** The model is unavailable for an unclassified reason. */
+  | 'LOCAL_LLM_UNAVAILABLE'
+  /** A prompt was sent to a session that is already generating a response. */
+  | 'LOCAL_LLM_RESPONSE_IN_PROGRESS'
+  /** The plugin implementation was not initialized. This should not occur under normal conditions. */
+  | 'LOCAL_LLM_NOT_INITIALIZED'
+  /** A required call parameter was missing (e.g. sessionId, prompt). */
+  | 'LOCAL_LLM_MISSING_PARAMETER'
+  /** The method was called on the web platform, which is not supported. */
+  | 'LOCAL_LLM_WEB_NOT_SUPPORTED'
+  /** Image generation failed (e.g. no available generation style). */
+  | 'LOCAL_LLM_IMAGE_GENERATION_FAILED';
+
+/**
+ * Error thrown by the LocalLLM plugin, carrying a machine-readable `code`.
+ *
+ * @since 1.0.0
+ * @example
+ * ```typescript
+ * try {
+ *   await LocalLLM.prompt({ prompt: 'Hello' });
+ * } catch (err) {
+ *   if (err instanceof LocalLLMException) {
+ *     console.log(err.code); // e.g. 'LOCAL_LLM_NOT_ENABLED'
+ *   }
+ * }
+ * ```
+ */
+export class LocalLLMException extends Error {
+  constructor(
+    public readonly code: LocalLLMErrorCode,
+    message: string,
+  ) {
+    super(message);
+    this.name = 'LocalLLMException';
+  }
+}
+
+/**
  * Options for warming up the on-device LLM.
  *
  * @since 1.0.0

@@ -118,22 +118,15 @@ class LocalLLM(private val context: android.content.Context) {
     ): String {
         // TODO: Implement image generation using Android's on-device image generation APIs
         // Return base64-encoded PNG image string
-        throw LocalLLMError.Unsupported()
+        throw LocalLLMError.ImageGenerationFailed()
     }
 
     private suspend fun checkAvailability() {
-        val availability = availability()
-
-        if (availability == LLMAvailability.Downloadable) {
-            throw LocalLLMError.Unavailable("model must be downloaded using 'download()'")
-        }
-
-        if (availability == LLMAvailability.NotReady) {
-            throw LocalLLMError.Unavailable("model is still downloading")
-        }
-
-        if (availability == LLMAvailability.Unavailable) {
-            throw LocalLLMError.Unsupported()
+        when (availability()) {
+            LLMAvailability.Downloadable -> throw LocalLLMError.NotReady()
+            LLMAvailability.NotReady -> throw LocalLLMError.NotReady()
+            LLMAvailability.Unavailable -> throw LocalLLMError.UnsupportedPlatform()
+            LLMAvailability.Available -> return
         }
     }
 }

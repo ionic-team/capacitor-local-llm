@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import type { PluginListenerHandle } from '@capacitor/core';
 import {
   IonButton,
   IonChip,
@@ -31,6 +32,13 @@ const Tab1: React.FC = () => {
   const [sessionId, setSessionId] = useState<string>("");
   const [response, setResponse] = useState<string | null>(null);
   const [awaitingResponse, setAwaitingResponse] = useState<boolean>(false);
+  const availabilityListenerRef = useRef<PluginListenerHandle | null>(null);
+
+  useEffect(() => {
+    return () => {
+      availabilityListenerRef.current?.remove();
+    };
+  }, []);
 
   const onStatusBtn = async () => {
     try {
@@ -45,21 +53,18 @@ const Tab1: React.FC = () => {
   };
 
   const onDownloadingModel = async () => {
-    let interval: NodeJS.Timeout | null = null;
     try {
-      interval = setInterval(async () => {
-        try {
-          const res = await LocalLLM.systemAvailability();
-          setSystemStatus(res.status);
-        } catch (err) {
-          if (interval) clearInterval(interval);
-          setResponse((err as Error).message);
+      availabilityListenerRef.current = await LocalLLM.addListener('systemAvailabilityChange', (status) => {
+        setSystemStatus(status);
+        if (status === 'available' || status === 'unavailable') {
+          availabilityListenerRef.current?.remove();
+          availabilityListenerRef.current = null;
         }
-      }, 1000);
+      });
       await LocalLLM.download();
-      clearInterval(interval);
     } catch (err) {
-      if (interval) clearInterval(interval);
+      availabilityListenerRef.current?.remove();
+      availabilityListenerRef.current = null;
       setResponse((err as Error).message);
     }
   };
