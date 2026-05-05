@@ -7,8 +7,7 @@ import MobileCoreServices
 public enum LLMAvailability: String, Sendable {
     case available = "available"
     case unavailable = "unavailable"
-    case notReady = "notready"
-    case responding = "responding"
+    case notReady = "notready"    
 }
 
 public struct LLMOptions: Sendable {

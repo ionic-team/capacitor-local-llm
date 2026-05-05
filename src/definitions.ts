@@ -267,7 +267,7 @@ export interface EndSessionOptions {
  *
  * @since 1.0.0
  */
-export type LLMAvailability = 'available' | 'unavailable' | 'notready' | 'downloadable' | 'responding';
+export type LLMAvailability = 'available' | 'unavailable' | 'notready' | 'downloadable';
 
 /**
  * Options for generating an image from a text prompt.
