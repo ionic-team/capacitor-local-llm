@@ -7,7 +7,7 @@ import MobileCoreServices
 public enum LLMAvailability: String, Sendable {
     case available = "available"
     case unavailable = "unavailable"
-    case notReady = "notready"    
+    case notReady = "notready"
 }
 
 public struct LLMOptions: Sendable {
@@ -71,8 +71,6 @@ public enum LocalLLMError: LocalizedError, CustomNSError {
     }
 }
 
-
-
 public class LocalLLM {
     private var _sessions: Any?
 
@@ -117,7 +115,7 @@ public class LocalLLM {
     func prompt(options: LLMPromptOptions) async throws -> String {
         if #available(iOS 26.0, *) {
             try checkAvailabilty()
-          
+
             let session: LanguageModelSession
 
             if let sessionId = options.sessionId {
@@ -216,7 +214,7 @@ public class LocalLLM {
 
         return CGImageSourceCreateImageAtIndex(source, 0, nil)
     }
-  
+
     private func checkAvailabilty() throws {
         if #available(iOS 26.0, *) {
             switch SystemLanguageModel.default.availability {
