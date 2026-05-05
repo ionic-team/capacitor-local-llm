@@ -23,12 +23,31 @@ public struct LLMPromptOptions: Sendable {
     let prompt: String
 }
 
-public enum LocalLLMError: Error {
+public enum LocalLLMError: LocalizedError, CustomNSError {
     case uninitialized
     case responseInProgress
     case unsupported
     case unavailable(reason: String)
+  
+  public var errorDescription: String? {
+      switch self {
+      case .uninitialized:
+          return "LocalLLM not initialized"
+      case .responseInProgress:
+          return "Response is already in progress"
+      case .unsupported:
+          return "Apple Intelligence is not supported on this device"
+      case .unavailable(let reason):
+          return "Apple Intelligence is currently unavailable: \(reason)"
+      }
+  }
+  
+  public var errorUserInfo: [String: Any] {
+    [NSLocalizedDescriptionKey: errorDescription ?? ""]
+  }
 }
+
+
 
 public class LocalLLM {
     private var _sessions: Any?

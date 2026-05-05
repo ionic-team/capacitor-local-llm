@@ -74,7 +74,7 @@ public class LocalLLMPlugin: CAPPlugin, CAPBridgedPlugin {
 
             call.resolve()
         } catch {
-            call.reject(error.localizedDescription)
+          call.reject(error.localizedDescription)
         }
     }
 
