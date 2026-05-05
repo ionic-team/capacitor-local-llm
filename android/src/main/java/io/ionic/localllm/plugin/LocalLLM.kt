@@ -14,7 +14,7 @@ data class ChatSession(
     val history: MutableList<Pair<String, String>> = mutableListOf()
 )
 
-class LocalLLM(private val context: android.content.Context) {
+class LocalLLM {
     val model: GenerativeModel = Generation.getClient()
     private val sessions: MutableMap<String, ChatSession> = mutableMapOf()
 

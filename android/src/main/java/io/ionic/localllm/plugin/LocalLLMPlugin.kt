@@ -22,7 +22,7 @@ class LocalLLMPlugin : Plugin() {
 
     override fun load() {
         super.load()
-        implementation = LocalLLM(context)
+        implementation = LocalLLM()
     }
 
     @PluginMethod(returnType = PluginMethod.RETURN_CALLBACK)
