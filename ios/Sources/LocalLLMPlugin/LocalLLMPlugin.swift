@@ -87,6 +87,11 @@ public class LocalLLMPlugin: CAPPlugin, CAPBridgedPlugin {
 
     @objc func prompt(_ call: CAPPluginCall) {
         let options = getLLMPromptOptionsFromCall(call)
+        
+        guard !options.prompt.isEmpty else {
+            rejectCall(call, LocalLLMError.missingParameter("prompt"))
+            return
+        }
 
         promptAsyncCallback(options: options) { result in
             switch result {
