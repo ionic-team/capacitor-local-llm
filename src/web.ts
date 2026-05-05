@@ -1,24 +1,29 @@
 import { WebPlugin } from '@capacitor/core';
 
 import type { GenerateImageResponse, PromptResponse, LocalLLMPlugin, SystemAvailabilityResponse } from './definitions';
+import { LocalLLMException } from './definitions';
 
 export class LocalLLMWeb extends WebPlugin implements LocalLLMPlugin {
+  private webUnsupported(): never {
+    throw new LocalLLMException('LOCAL_LLM_WEB_NOT_SUPPORTED', 'Not available on the web');
+  }
+
   systemAvailability(): Promise<SystemAvailabilityResponse> {
-    throw new Error('not available on the web.');
+    return this.webUnsupported();
   }
   download(): Promise<void> {
-    throw new Error('not available on the web.');
+    return this.webUnsupported();
   }
   prompt(): Promise<PromptResponse> {
-    throw new Error('not available on the web.');
+    return this.webUnsupported();
   }
   endSession(): Promise<void> {
-    throw new Error('not available on the web.');
+    return this.webUnsupported();
   }
   generateImage(): Promise<GenerateImageResponse> {
-    throw new Error('not available on the web.');
+    return this.webUnsupported();
   }
   warmup(): Promise<void> {
-    throw new Error('not available on the web.');
+    return this.webUnsupported();
   }
 }

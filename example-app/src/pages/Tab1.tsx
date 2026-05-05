@@ -1,74 +1,94 @@
-import { useState } from 'react';
-import { IonButton, IonContent, IonHeader, IonPage, IonSpinner, IonTextarea, IonTitle, IonToolbar } from '@ionic/react';
+import { useEffect, useRef, useState } from 'react';
+import type { PluginListenerHandle } from '@capacitor/core';
+import {
+  IonButton,
+  IonChip,
+  IonContent,
+  IonHeader,
+  IonLabel,
+  IonPage,
+  IonSpinner,
+  IonTextarea,
+  IonTitle,
+  IonToolbar,
+} from '@ionic/react';
 import { LocalLLM } from "@capacitor/local-llm";
 
 import './Tab1.css';
 
+const formatError = (err: unknown): string => {
+  const message = (err as Error).message ?? 'Unknown error';
+  const code = (err as any).code;
+  return code ? `[${code}] ${message}` : message;
+};
+
+const statusColor = (status: string): string => {
+  switch (status) {
+    case 'available': return 'success';
+    case 'unavailable': return 'danger';
+    case 'notready':
+    case 'downloadable': return 'warning';
+    default: return 'medium';
+  }
+};
 
 const Tab1: React.FC = () => {
-  const [systemStatus, setSystemStatus] = useState<string>("---");
+  const [systemStatus, setSystemStatus] = useState<string | null>(null);
   const [prompt, setPrompt] = useState<string>("What is an LLM?");
   const [sessionId, setSessionId] = useState<string>("");
-  const [response, setResponse] = useState<string>("---");
+  const [response, setResponse] = useState<string | null>(null);
   const [awaitingResponse, setAwaitingResponse] = useState<boolean>(false);
+  const availabilityListenerRef = useRef<PluginListenerHandle | null>(null);
+
+  useEffect(() => {
+    return () => {
+      availabilityListenerRef.current?.remove();
+    };
+  }, []);
 
   const onStatusBtn = async () => {
     try {
       const res = await LocalLLM.systemAvailability();
       setSystemStatus(res.status);
-
-      if (res.status == 'downloadable') {
+      if (res.status === 'downloadable') {
         onDownloadingModel();
       }
     } catch (err) {
-      setResponse((err as Error).message);
+      setResponse(formatError(err));
     }
   };
 
   const onDownloadingModel = async () => {
-    let interval: NodeJS.Timeout | null = null;
     try {
-      interval = setInterval(async () => {
-        try {
-          const res = await LocalLLM.systemAvailability();
-          setSystemStatus(res.status);
-        } catch (err) {
-          if (interval) {
-            clearInterval(interval);
-          }
-          setResponse((err as Error).message);
+      availabilityListenerRef.current = await LocalLLM.addListener('systemAvailabilityChange', (status) => {
+        setSystemStatus(status);
+        if (status === 'available' || status === 'unavailable') {
+          availabilityListenerRef.current?.remove();
+          availabilityListenerRef.current = null;
         }
-      }, 1000);
+      });
       await LocalLLM.download();
-      clearInterval(interval);
     } catch (err) {
-      if (interval) {
-        clearInterval(interval)
-      }
-      setResponse((err as Error).message);
+      availabilityListenerRef.current?.remove();
+      availabilityListenerRef.current = null;
+      setResponse(formatError(err));
     }
-  }
+  };
 
   const onPromptBtn = async () => {
     setAwaitingResponse(true);
-
-    let promptSessionId: string | undefined = sessionId;
-    if (promptSessionId == "") {
-      promptSessionId = undefined;
-    }
+    setResponse(null);
 
     try {
       const res = await LocalLLM.prompt({
         prompt,
-        sessionId: promptSessionId
+        sessionId: sessionId || undefined,
       });
-
-      setAwaitingResponse(false);
-
       setResponse(res.text);
     } catch (err: unknown) {
+      setResponse(formatError(err));
+    } finally {
       setAwaitingResponse(false);
-      setResponse((err as Error).message);
     }
   };
 
@@ -89,39 +109,38 @@ const Tab1: React.FC = () => {
           <IonButton expand="block" onClick={onStatusBtn}>
             Check Status
           </IonButton>
-          <code>{systemStatus}</code>
+          {systemStatus && (
+            <IonChip color={statusColor(systemStatus)}>
+              <IonLabel>{systemStatus}</IonLabel>
+            </IonChip>
+          )}
 
           <IonTextarea
-            label="Enter a Session ID (optional)"
+            fill="outline"
+            labelPlacement="floating"
+            label="Session ID (optional)"
             value={sessionId}
-            onChange={(e) => {
-              setSessionId(e.currentTarget.value ?? "");
-            }}
-          ></IonTextarea>
+            onIonInput={(e) => setSessionId(e.detail.value ?? "")}
+          />
 
           <IonTextarea
-            label="Enter a Prompt"
+            fill="outline"
+            labelPlacement="floating"
+            label="Prompt"
             value={prompt}
-            onChange={(e) => {
-              setPrompt(e.currentTarget.value ?? "");
-            }}
-          ></IonTextarea>
-          <IonButton
-            disabled={awaitingResponse}
-            expand="block"
-            onClick={onPromptBtn}
-          >
-            Prompt
+            onIonInput={(e) => setPrompt(e.detail.value ?? "")}
+          />
+
+          <IonButton expand="block" disabled={awaitingResponse} onClick={onPromptBtn}>
+            Send Prompt
           </IonButton>
-          <code>
-            {awaitingResponse ? (
-              <div className="loading">
-                <IonSpinner></IonSpinner>
-              </div>
-            ) : (
-              response
-            )}
-          </code>
+
+          {awaitingResponse && (
+            <div className="loading">
+              <IonSpinner />
+            </div>
+          )}
+          {response && <p className="response">{response}</p>}
         </div>
       </IonContent>
     </IonPage>
