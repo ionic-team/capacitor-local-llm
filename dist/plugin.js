@@ -1,28 +1,54 @@
 var capacitorLocalLLM = (function (exports, core) {
     'use strict';
 
+    /**
+     * Error thrown by the LocalLLM plugin, carrying a machine-readable `code`.
+     *
+     * @since 1.0.0
+     * @example
+     * ```typescript
+     * try {
+     *   await LocalLLM.prompt({ prompt: 'Hello' });
+     * } catch (err) {
+     *   if (err instanceof LocalLLMException) {
+     *     console.log(err.code); // e.g. 'LOCAL_LLM_NOT_ENABLED'
+     *   }
+     * }
+     * ```
+     */
+    class LocalLLMException extends Error {
+        constructor(code, message) {
+            super(message);
+            this.code = code;
+            this.name = 'LocalLLMException';
+        }
+    }
+
     const LocalLLM = core.registerPlugin('LocalLLM', {
         web: () => Promise.resolve().then(function () { return web; }).then((m) => new m.LocalLLMWeb()),
     });
 
     class LocalLLMWeb extends core.WebPlugin {
+        webUnsupported() {
+            throw new LocalLLMException('LOCAL_LLM_WEB_NOT_SUPPORTED', 'Not available on the web');
+        }
         systemAvailability() {
-            throw new Error('not available on the web.');
+            return this.webUnsupported();
         }
         download() {
-            throw new Error('not available on the web.');
+            return this.webUnsupported();
         }
         prompt() {
-            throw new Error('not available on the web.');
+            return this.webUnsupported();
         }
         endSession() {
-            throw new Error('not available on the web.');
+            return this.webUnsupported();
         }
         generateImage() {
-            throw new Error('not available on the web.');
+            return this.webUnsupported();
         }
         warmup() {
-            throw new Error('not available on the web.');
+            return this.webUnsupported();
         }
     }
 
@@ -32,6 +58,7 @@ var capacitorLocalLLM = (function (exports, core) {
     });
 
     exports.LocalLLM = LocalLLM;
+    exports.LocalLLMException = LocalLLMException;
 
     return exports;
 

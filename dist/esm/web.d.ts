@@ -1,6 +1,7 @@
 import { WebPlugin } from '@capacitor/core';
 import type { GenerateImageResponse, PromptResponse, LocalLLMPlugin, SystemAvailabilityResponse } from './definitions';
 export declare class LocalLLMWeb extends WebPlugin implements LocalLLMPlugin {
+    private webUnsupported;
     systemAvailability(): Promise<SystemAvailabilityResponse>;
     download(): Promise<void>;
     prompt(): Promise<PromptResponse>;

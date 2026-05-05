@@ -1,22 +1,26 @@
 import { WebPlugin } from '@capacitor/core';
+import { LocalLLMException } from './definitions';
 export class LocalLLMWeb extends WebPlugin {
+    webUnsupported() {
+        throw new LocalLLMException('LOCAL_LLM_WEB_NOT_SUPPORTED', 'Not available on the web');
+    }
     systemAvailability() {
-        throw new Error('not available on the web.');
+        return this.webUnsupported();
     }
     download() {
-        throw new Error('not available on the web.');
+        return this.webUnsupported();
     }
     prompt() {
-        throw new Error('not available on the web.');
+        return this.webUnsupported();
     }
     endSession() {
-        throw new Error('not available on the web.');
+        return this.webUnsupported();
     }
     generateImage() {
-        throw new Error('not available on the web.');
+        return this.webUnsupported();
     }
     warmup() {
-        throw new Error('not available on the web.');
+        return this.webUnsupported();
     }
 }
 //# sourceMappingURL=web.js.map
