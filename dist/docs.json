@@ -1,0 +1,663 @@
+{
+  "api": {
+    "name": "LocalLLMPlugin",
+    "slug": "localllmplugin",
+    "docs": "The main plugin interface for interacting with on-device LLMs.",
+    "tags": [
+      {
+        "text": "1.0.0",
+        "name": "since"
+      },
+      {
+        "text": "ios",
+        "name": "platform"
+      },
+      {
+        "text": "android",
+        "name": "platform"
+      }
+    ],
+    "methods": [
+      {
+        "name": "systemAvailability",
+        "signature": "() => Promise<SystemAvailabilityResponse>",
+        "parameters": [],
+        "returns": "Promise<SystemAvailabilityResponse>",
+        "tags": [
+          {
+            "name": "since",
+            "text": "1.0.0"
+          },
+          {
+            "name": "example",
+            "text": "```typescript\nconst { status } = await LocalLLM.systemAvailability();\n```"
+          },
+          {
+            "name": "returns",
+            "text": "A promise that resolves with the system availability status"
+          }
+        ],
+        "docs": "Checks the availability status of the on-device LLM.\n\nUse this method to determine if the LLM is ready to use, needs to be downloaded,\nor is unavailable on the device.",
+        "complexTypes": [
+          "SystemAvailabilityResponse"
+        ],
+        "slug": "systemavailability"
+      },
+      {
+        "name": "download",
+        "signature": "() => Promise<void>",
+        "parameters": [],
+        "returns": "Promise<void>",
+        "tags": [
+          {
+            "name": "since",
+            "text": "1.0.0"
+          },
+          {
+            "name": "platform",
+            "text": "android"
+          },
+          {
+            "name": "example",
+            "text": "```typescript\nawait LocalLLM.download();\n```"
+          },
+          {
+            "name": "returns",
+            "text": "A promise that resolves when the download completes"
+          }
+        ],
+        "docs": "Downloads the on-device LLM model.\n\nThis method initiates the download of the LLM model when it's not already\npresent on the device. Only available on Android.",
+        "complexTypes": [],
+        "slug": "download"
+      },
+      {
+        "name": "prompt",
+        "signature": "(options: PromptOptions) => Promise<PromptResponse>",
+        "parameters": [
+          {
+            "name": "options",
+            "docs": "- The prompt options including the text prompt and optional configuration",
+            "type": "PromptOptions"
+          }
+        ],
+        "returns": "Promise<PromptResponse>",
+        "tags": [
+          {
+            "name": "since",
+            "text": "1.0.0"
+          },
+          {
+            "name": "example",
+            "text": "```typescript\nconst response = await LocalLLM.prompt({ prompt: 'What is the capital of France?' });\n```"
+          },
+          {
+            "name": "param",
+            "text": "options - The prompt options including the text prompt and optional configuration"
+          },
+          {
+            "name": "returns",
+            "text": "A promise that resolves with the LLM's text response"
+          }
+        ],
+        "docs": "Sends a prompt to the on-device LLM and receives a response.\n\nUse this method to interact with the LLM. You can optionally provide a sessionId\nto maintain conversation context across multiple prompts.",
+        "complexTypes": [
+          "PromptResponse",
+          "PromptOptions"
+        ],
+        "slug": "prompt"
+      },
+      {
+        "name": "endSession",
+        "signature": "(options: EndSessionOptions) => Promise<void>",
+        "parameters": [
+          {
+            "name": "options",
+            "docs": "- The options containing the sessionId to end",
+            "type": "EndSessionOptions"
+          }
+        ],
+        "returns": "Promise<void>",
+        "tags": [
+          {
+            "name": "since",
+            "text": "1.0.0"
+          },
+          {
+            "name": "example",
+            "text": "```typescript\nawait LocalLLM.endSession({ sessionId: 'session-123' });\n```"
+          },
+          {
+            "name": "param",
+            "text": "options - The options containing the sessionId to end"
+          },
+          {
+            "name": "returns",
+            "text": "A promise that resolves when the session is ended"
+          }
+        ],
+        "docs": "Ends an active LLM session.\n\nUse this method to clean up resources when you're done with a conversation session.\nThis is important for managing memory and preventing resource leaks.",
+        "complexTypes": [
+          "EndSessionOptions"
+        ],
+        "slug": "endsession"
+      },
+      {
+        "name": "generateImage",
+        "signature": "(options: GenerateImageOptions) => Promise<GenerateImageResponse>",
+        "parameters": [
+          {
+            "name": "options",
+            "docs": "- The image generation options including the prompt, optional reference images, and count",
+            "type": "GenerateImageOptions"
+          }
+        ],
+        "returns": "Promise<GenerateImageResponse>",
+        "tags": [
+          {
+            "name": "since",
+            "text": "1.0.0"
+          },
+          {
+            "name": "platform",
+            "text": "ios"
+          },
+          {
+            "name": "example",
+            "text": "```typescript\n// Generate 2 variations from a text prompt\nconst result = await LocalLLM.generateImage({ prompt: 'A sunset over mountains', count: 2 });\nconsole.log(result.pngBase64Images.length); // 2\n\n// Generate with reference image\nconst withRef = await LocalLLM.generateImage({\n  prompt: 'A modern version of this painting',\n  promptImages: ['data:image/png;base64,iVBORw0KGg...']\n});\n```"
+          },
+          {
+            "name": "param",
+            "text": "options - The image generation options including the prompt, optional reference images, and count"
+          },
+          {
+            "name": "returns",
+            "text": "A promise that resolves with an array of generated image data"
+          }
+        ],
+        "docs": "Generates images from a text prompt using the on-device LLM.\n\nUse this method to create images based on text descriptions. Optionally provide\nreference images to influence the generation. The generated images are returned\nas base64-encoded PNG strings in an array.",
+        "complexTypes": [
+          "GenerateImageResponse",
+          "GenerateImageOptions"
+        ],
+        "slug": "generateimage"
+      },
+      {
+        "name": "warmup",
+        "signature": "(options: WarmupOptions) => Promise<void>",
+        "parameters": [
+          {
+            "name": "options",
+            "docs": "- The warmup options including the prompt prefix",
+            "type": "WarmupOptions"
+          }
+        ],
+        "returns": "Promise<void>",
+        "tags": [
+          {
+            "name": "since",
+            "text": "1.0.0"
+          },
+          {
+            "name": "example",
+            "text": "```typescript\nawait LocalLLM.warmup({ promptPrefix: 'You are a helpful assistant.' });\n```"
+          },
+          {
+            "name": "param",
+            "text": "options - The warmup options including the prompt prefix"
+          },
+          {
+            "name": "returns",
+            "text": "A promise that resolves when warmup is complete"
+          }
+        ],
+        "docs": "Warms up the on-device LLM for faster initial responses.\n\nUse this method to pre-initialize the LLM with a prompt prefix, reducing latency\nfor the first actual prompt. This is useful when you know in advance the type of\nprompts you'll be sending.",
+        "complexTypes": [
+          "WarmupOptions"
+        ],
+        "slug": "warmup"
+      },
+      {
+        "name": "addListener",
+        "signature": "(eventName: 'systemAvailabilityChange', listenerFunc: SystemAvailabilityChangeListener) => Promise<PluginListenerHandle>",
+        "parameters": [
+          {
+            "name": "eventName",
+            "docs": "- The event name to listen for",
+            "type": "'systemAvailabilityChange'"
+          },
+          {
+            "name": "listenerFunc",
+            "docs": "- The callback invoked with the new availability status on each change",
+            "type": "SystemAvailabilityChangeListener"
+          }
+        ],
+        "returns": "Promise<PluginListenerHandle>",
+        "tags": [
+          {
+            "name": "since",
+            "text": "1.0.0"
+          },
+          {
+            "name": "example",
+            "text": "```typescript\nconst handle = await LocalLLM.addListener('systemAvailabilityChange', (status) => {\n  console.log('LLM availability changed:', status);\n});\n\n// Later, to stop listening:\nawait handle.remove();\n```"
+          },
+          {
+            "name": "param",
+            "text": "eventName - The event name to listen for"
+          },
+          {
+            "name": "param",
+            "text": "listenerFunc - The callback invoked with the new availability status on each change"
+          },
+          {
+            "name": "returns",
+            "text": "A handle that can be used to remove this specific listener"
+          }
+        ],
+        "docs": "Registers a listener that is called whenever the on-device LLM availability status changes.\n\nThe listener is invoked with the new availability status each time it changes. Polling\nbegins when the first listener is added and stops when all listeners are removed via\n`removeAllListeners()`.",
+        "complexTypes": [
+          "PluginListenerHandle",
+          "SystemAvailabilityChangeListener"
+        ],
+        "slug": "addlistenersystemavailabilitychange-"
+      },
+      {
+        "name": "removeAllListeners",
+        "signature": "() => Promise<void>",
+        "parameters": [],
+        "returns": "Promise<void>",
+        "tags": [],
+        "docs": "",
+        "complexTypes": [],
+        "slug": "removealllisteners"
+      }
+    ],
+    "properties": []
+  },
+  "interfaces": [
+    {
+      "name": "SystemAvailabilityResponse",
+      "slug": "systemavailabilityresponse",
+      "docs": "Response containing the system availability status of the on-device LLM.",
+      "tags": [
+        {
+          "text": "1.0.0",
+          "name": "since"
+        }
+      ],
+      "methods": [],
+      "properties": [
+        {
+          "name": "status",
+          "tags": [
+            {
+              "text": "1.0.0",
+              "name": "since"
+            }
+          ],
+          "docs": "The current availability status of the LLM.",
+          "complexTypes": [
+            "LLMAvailability"
+          ],
+          "type": "LLMAvailability"
+        }
+      ]
+    },
+    {
+      "name": "PromptResponse",
+      "slug": "promptresponse",
+      "docs": "Response from the LLM after processing a prompt.",
+      "tags": [
+        {
+          "text": "1.0.0",
+          "name": "since"
+        }
+      ],
+      "methods": [],
+      "properties": [
+        {
+          "name": "text",
+          "tags": [
+            {
+              "text": "1.0.0",
+              "name": "since"
+            }
+          ],
+          "docs": "The text response generated by the LLM.",
+          "complexTypes": [],
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "PromptOptions",
+      "slug": "promptoptions",
+      "docs": "Options for sending a prompt to the LLM.",
+      "tags": [
+        {
+          "text": "1.0.0",
+          "name": "since"
+        }
+      ],
+      "methods": [],
+      "properties": [
+        {
+          "name": "sessionId",
+          "tags": [
+            {
+              "text": "1.0.0",
+              "name": "since"
+            }
+          ],
+          "docs": "Optional session identifier for maintaining conversation context.\n\nProvide the same sessionId across multiple prompts to maintain context.\nIf not provided, each prompt is treated as independent.",
+          "complexTypes": [],
+          "type": "string | undefined"
+        },
+        {
+          "name": "instructions",
+          "tags": [
+            {
+              "text": "1.0.0",
+              "name": "since"
+            },
+            {
+              "text": "'You are a helpful assistant that provides concise answers.'",
+              "name": "example"
+            }
+          ],
+          "docs": "System-level instructions to guide the LLM's behavior.\n\nUse this to set the role, tone, or constraints for the LLM's responses.",
+          "complexTypes": [],
+          "type": "string | undefined"
+        },
+        {
+          "name": "options",
+          "tags": [
+            {
+              "text": "1.0.0",
+              "name": "since"
+            }
+          ],
+          "docs": "Configuration options for controlling LLM inference behavior.",
+          "complexTypes": [
+            "LLMOptions"
+          ],
+          "type": "LLMOptions"
+        },
+        {
+          "name": "prompt",
+          "tags": [
+            {
+              "text": "1.0.0",
+              "name": "since"
+            }
+          ],
+          "docs": "The text prompt to send to the LLM.",
+          "complexTypes": [],
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "LLMOptions",
+      "slug": "llmoptions",
+      "docs": "Configuration options for LLM inference behavior.",
+      "tags": [
+        {
+          "text": "1.0.0",
+          "name": "since"
+        }
+      ],
+      "methods": [],
+      "properties": [
+        {
+          "name": "temperature",
+          "tags": [
+            {
+              "text": "1.0.0",
+              "name": "since"
+            }
+          ],
+          "docs": "Controls randomness in the model's output.\n\nHigher values (e.g., 0.8) make output more random, while lower values\n(e.g., 0.2) make it more focused and deterministic.",
+          "complexTypes": [],
+          "type": "number | undefined"
+        },
+        {
+          "name": "maximumOutputTokens",
+          "tags": [
+            {
+              "text": "1.0.0",
+              "name": "since"
+            }
+          ],
+          "docs": "The maximum number of tokens to generate in the response.\n\nOn Android, this must be between 1 and 256.",
+          "complexTypes": [],
+          "type": "number | undefined"
+        }
+      ]
+    },
+    {
+      "name": "EndSessionOptions",
+      "slug": "endsessionoptions",
+      "docs": "Options for ending an active LLM session.",
+      "tags": [
+        {
+          "text": "1.0.0",
+          "name": "since"
+        }
+      ],
+      "methods": [],
+      "properties": [
+        {
+          "name": "sessionId",
+          "tags": [
+            {
+              "text": "1.0.0",
+              "name": "since"
+            }
+          ],
+          "docs": "The identifier of the session to end.\n\nThis should match the sessionId used in previous prompt() calls.",
+          "complexTypes": [],
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "GenerateImageResponse",
+      "slug": "generateimageresponse",
+      "docs": "Response containing the generated image data.",
+      "tags": [
+        {
+          "text": "1.0.0",
+          "name": "since"
+        }
+      ],
+      "methods": [],
+      "properties": [
+        {
+          "name": "pngBase64Images",
+          "tags": [
+            {
+              "text": "1.0.0",
+              "name": "since"
+            },
+            {
+              "text": "['iVBORw0KGgoAAAANSUhEUg...', 'iVBORw0KGgoAAAANSUhEUg...']",
+              "name": "example"
+            }
+          ],
+          "docs": "Array of generated images as base64-encoded PNG strings.\n\nEach string contains raw base64 data (without data URI prefix).\nTo use in an img tag, prefix with 'data:image/png;base64,'.",
+          "complexTypes": [],
+          "type": "string[]"
+        }
+      ]
+    },
+    {
+      "name": "GenerateImageOptions",
+      "slug": "generateimageoptions",
+      "docs": "Options for generating an image from a text prompt.",
+      "tags": [
+        {
+          "text": "1.0.0",
+          "name": "since"
+        }
+      ],
+      "methods": [],
+      "properties": [
+        {
+          "name": "prompt",
+          "tags": [
+            {
+              "text": "1.0.0",
+              "name": "since"
+            }
+          ],
+          "docs": "The text prompt describing the image to generate.",
+          "complexTypes": [],
+          "type": "string"
+        },
+        {
+          "name": "promptImages",
+          "tags": [
+            {
+              "text": "1.0.0",
+              "name": "since"
+            },
+            {
+              "text": "['data:image/png;base64,iVBORw0KGg...', '/9j/4AAQSkZJRg...']",
+              "name": "example"
+            }
+          ],
+          "docs": "Optional array of reference images to influence the generated output.\n\nProvide base64-encoded image strings (with or without data URI prefix) that\nwill be used as visual context or inspiration for the image generation.\nThis allows you to combine text and image concepts for more controlled output.",
+          "complexTypes": [],
+          "type": "string[] | undefined"
+        },
+        {
+          "name": "count",
+          "tags": [
+            {
+              "text": "1.0.0",
+              "name": "since"
+            },
+            {
+              "text": "1",
+              "name": "default"
+            }
+          ],
+          "docs": "The number of image variations to generate.\n\nDefaults to 1 if not specified.",
+          "complexTypes": [],
+          "type": "number | undefined"
+        }
+      ]
+    },
+    {
+      "name": "WarmupOptions",
+      "slug": "warmupoptions",
+      "docs": "Options for warming up the on-device LLM.",
+      "tags": [
+        {
+          "text": "1.0.0",
+          "name": "since"
+        }
+      ],
+      "methods": [],
+      "properties": [
+        {
+          "name": "sessionId",
+          "tags": [
+            {
+              "text": "1.0.0",
+              "name": "since"
+            },
+            {
+              "text": "ios",
+              "name": "platform"
+            }
+          ],
+          "docs": "The session identifier for the warmup.\n\nThis identifier will be associated with the warmed-up session,\nallowing you to use the same session for subsequent prompts.",
+          "complexTypes": [],
+          "type": "string"
+        },
+        {
+          "name": "promptPrefix",
+          "tags": [
+            {
+              "text": "1.0.0",
+              "name": "since"
+            },
+            {
+              "text": "ios",
+              "name": "platform"
+            },
+            {
+              "text": "'You are a helpful assistant that provides concise answers.'",
+              "name": "example"
+            }
+          ],
+          "docs": "The prompt prefix to use for warming up the LLM.\n\nThis text will be used to pre-initialize the model, reducing latency\nfor subsequent prompts with similar prefixes.",
+          "complexTypes": [],
+          "type": "string | undefined"
+        }
+      ]
+    },
+    {
+      "name": "PluginListenerHandle",
+      "slug": "pluginlistenerhandle",
+      "docs": "",
+      "tags": [],
+      "methods": [],
+      "properties": [
+        {
+          "name": "remove",
+          "tags": [],
+          "docs": "",
+          "complexTypes": [],
+          "type": "() => Promise<void>"
+        }
+      ]
+    }
+  ],
+  "enums": [],
+  "typeAliases": [
+    {
+      "name": "LLMAvailability",
+      "slug": "llmavailability",
+      "docs": "Availability status of the on-device LLM.",
+      "types": [
+        {
+          "text": "'available'",
+          "complexTypes": []
+        },
+        {
+          "text": "'unavailable'",
+          "complexTypes": []
+        },
+        {
+          "text": "'notready'",
+          "complexTypes": []
+        },
+        {
+          "text": "'downloadable'",
+          "complexTypes": []
+        },
+        {
+          "text": "'responding'",
+          "complexTypes": []
+        }
+      ]
+    },
+    {
+      "name": "SystemAvailabilityChangeListener",
+      "slug": "systemavailabilitychangelistener",
+      "docs": "Callback invoked when the on-device LLM availability status changes.",
+      "types": [
+        {
+          "text": "(availability: LLMAvailability): void",
+          "complexTypes": [
+            "LLMAvailability"
+          ]
+        }
+      ]
+    }
+  ],
+  "pluginConfigs": []
+}

@@ -1,0 +1,326 @@
+import type { PluginListenerHandle } from '@capacitor/core';
+/**
+ * The main plugin interface for interacting with on-device LLMs.
+ *
+ * @since 1.0.0
+ * @platform ios
+ * @platform android
+ */
+export interface LocalLLMPlugin {
+    /**
+     * Checks the availability status of the on-device LLM.
+     *
+     * Use this method to determine if the LLM is ready to use, needs to be downloaded,
+     * or is unavailable on the device.
+     *
+     * @since 1.0.0
+     * @example
+     * ```typescript
+     * const { status } = await LocalLLM.systemAvailability();
+     * ```
+     * @returns A promise that resolves with the system availability status
+     */
+    systemAvailability(): Promise<SystemAvailabilityResponse>;
+    /**
+     * Downloads the on-device LLM model.
+     *
+     * This method initiates the download of the LLM model when it's not already
+     * present on the device. Only available on Android.
+     *
+     * @since 1.0.0
+     * @platform android
+     * @example
+     * ```typescript
+     * await LocalLLM.download();
+     * ```
+     * @returns A promise that resolves when the download completes
+     */
+    download(): Promise<void>;
+    /**
+     * Sends a prompt to the on-device LLM and receives a response.
+     *
+     * Use this method to interact with the LLM. You can optionally provide a sessionId
+     * to maintain conversation context across multiple prompts.
+     *
+     * @since 1.0.0
+     * @example
+     * ```typescript
+     * const response = await LocalLLM.prompt({ prompt: 'What is the capital of France?' });
+     * ```
+     * @param options - The prompt options including the text prompt and optional configuration
+     * @returns A promise that resolves with the LLM's text response
+     */
+    prompt(options: PromptOptions): Promise<PromptResponse>;
+    /**
+     * Ends an active LLM session.
+     *
+     * Use this method to clean up resources when you're done with a conversation session.
+     * This is important for managing memory and preventing resource leaks.
+     *
+     * @since 1.0.0
+     * @example
+     * ```typescript
+     * await LocalLLM.endSession({ sessionId: 'session-123' });
+     * ```
+     * @param options - The options containing the sessionId to end
+     * @returns A promise that resolves when the session is ended
+     */
+    endSession(options: EndSessionOptions): Promise<void>;
+    /**
+     * Generates images from a text prompt using the on-device LLM.
+     *
+     * Use this method to create images based on text descriptions. Optionally provide
+     * reference images to influence the generation. The generated images are returned
+     * as base64-encoded PNG strings in an array.
+     *
+     * @since 1.0.0
+     * @platform ios
+     * @example
+     * ```typescript
+     * // Generate 2 variations from a text prompt
+     * const result = await LocalLLM.generateImage({ prompt: 'A sunset over mountains', count: 2 });
+     * console.log(result.pngBase64Images.length); // 2
+     *
+     * // Generate with reference image
+     * const withRef = await LocalLLM.generateImage({
+     *   prompt: 'A modern version of this painting',
+     *   promptImages: ['data:image/png;base64,iVBORw0KGg...']
+     * });
+     * ```
+     * @param options - The image generation options including the prompt, optional reference images, and count
+     * @returns A promise that resolves with an array of generated image data
+     */
+    generateImage(options: GenerateImageOptions): Promise<GenerateImageResponse>;
+    /**
+     * Warms up the on-device LLM for faster initial responses.
+     *
+     * Use this method to pre-initialize the LLM with a prompt prefix, reducing latency
+     * for the first actual prompt. This is useful when you know in advance the type of
+     * prompts you'll be sending.
+     *
+     * @since 1.0.0
+     * @example
+     * ```typescript
+     * await LocalLLM.warmup({ promptPrefix: 'You are a helpful assistant.' });
+     * ```
+     * @param options - The warmup options including the prompt prefix
+     * @returns A promise that resolves when warmup is complete
+     */
+    warmup(options: WarmupOptions): Promise<void>;
+    /**
+     * Registers a listener that is called whenever the on-device LLM availability status changes.
+     *
+     * The listener is invoked with the new availability status each time it changes. Polling
+     * begins when the first listener is added and stops when all listeners are removed via
+     * `removeAllListeners()`.
+     *
+     * @since 1.0.0
+     * @example
+     * ```typescript
+     * const handle = await LocalLLM.addListener('systemAvailabilityChange', (status) => {
+     *   console.log('LLM availability changed:', status);
+     * });
+     *
+     * // Later, to stop listening:
+     * await handle.remove();
+     * ```
+     * @param eventName - The event name to listen for
+     * @param listenerFunc - The callback invoked with the new availability status on each change
+     * @returns A handle that can be used to remove this specific listener
+     */
+    addListener(eventName: 'systemAvailabilityChange', listenerFunc: SystemAvailabilityChangeListener): Promise<PluginListenerHandle>;
+    removeAllListeners(): Promise<void>;
+}
+/**
+ * Callback invoked when the on-device LLM availability status changes.
+ *
+ * @since 1.0.0
+ * @param availability - The new availability status of the LLM
+ */
+export type SystemAvailabilityChangeListener = (availability: LLMAvailability) => void;
+/**
+ * Configuration options for LLM inference behavior.
+ *
+ * @since 1.0.0
+ */
+export interface LLMOptions {
+    /**
+     * Controls randomness in the model's output.
+     *
+     * Higher values (e.g., 0.8) make output more random, while lower values
+     * (e.g., 0.2) make it more focused and deterministic.
+     *
+     * @since 1.0.0
+     */
+    temperature?: number;
+    /**
+     * The maximum number of tokens to generate in the response.
+     *
+     * On Android, this must be between 1 and 256.
+     *
+     * @since 1.0.0
+     */
+    maximumOutputTokens?: number;
+}
+/**
+ * Options for sending a prompt to the LLM.
+ *
+ * @since 1.0.0
+ */
+export interface PromptOptions {
+    /**
+     * Optional session identifier for maintaining conversation context.
+     *
+     * Provide the same sessionId across multiple prompts to maintain context.
+     * If not provided, each prompt is treated as independent.
+     *
+     * @since 1.0.0
+     */
+    sessionId?: string;
+    /**
+     * System-level instructions to guide the LLM's behavior.
+     *
+     * Use this to set the role, tone, or constraints for the LLM's responses.
+     *
+     * @since 1.0.0
+     * @example 'You are a helpful assistant that provides concise answers.'
+     */
+    instructions?: string;
+    /**
+     * Configuration options for controlling LLM inference behavior.
+     *
+     * @since 1.0.0
+     */
+    options?: LLMOptions;
+    /**
+     * The text prompt to send to the LLM.
+     *
+     * @since 1.0.0
+     */
+    prompt: string;
+}
+/**
+ * Response from the LLM after processing a prompt.
+ *
+ * @since 1.0.0
+ */
+export interface PromptResponse {
+    /**
+     * The text response generated by the LLM.
+     *
+     * @since 1.0.0
+     */
+    text: string;
+}
+/**
+ * Response containing the system availability status of the on-device LLM.
+ *
+ * @since 1.0.0
+ */
+export interface SystemAvailabilityResponse {
+    /**
+     * The current availability status of the LLM.
+     *
+     * @since 1.0.0
+     */
+    status: LLMAvailability;
+}
+/**
+ * Options for ending an active LLM session.
+ *
+ * @since 1.0.0
+ */
+export interface EndSessionOptions {
+    /**
+     * The identifier of the session to end.
+     *
+     * This should match the sessionId used in previous prompt() calls.
+     *
+     * @since 1.0.0
+     */
+    sessionId: string;
+}
+/**
+ * Availability status of the on-device LLM.
+ *
+ * @since 1.0.0
+ */
+export type LLMAvailability = 'available' | 'unavailable' | 'notready' | 'downloadable' | 'responding';
+/**
+ * Options for generating an image from a text prompt.
+ *
+ * @since 1.0.0
+ */
+export interface GenerateImageOptions {
+    /**
+     * The text prompt describing the image to generate.
+     *
+     * @since 1.0.0
+     */
+    prompt: string;
+    /**
+     * Optional array of reference images to influence the generated output.
+     *
+     * Provide base64-encoded image strings (with or without data URI prefix) that
+     * will be used as visual context or inspiration for the image generation.
+     * This allows you to combine text and image concepts for more controlled output.
+     *
+     * @since 1.0.0
+     * @example ['data:image/png;base64,iVBORw0KGg...', '/9j/4AAQSkZJRg...']
+     */
+    promptImages?: string[];
+    /**
+     * The number of image variations to generate.
+     *
+     * Defaults to 1 if not specified.
+     *
+     * @since 1.0.0
+     * @default 1
+     */
+    count?: number;
+}
+/**
+ * Response containing the generated image data.
+ *
+ * @since 1.0.0
+ */
+export interface GenerateImageResponse {
+    /**
+     * Array of generated images as base64-encoded PNG strings.
+     *
+     * Each string contains raw base64 data (without data URI prefix).
+     * To use in an img tag, prefix with 'data:image/png;base64,'.
+     *
+     * @since 1.0.0
+     * @example ['iVBORw0KGgoAAAANSUhEUg...', 'iVBORw0KGgoAAAANSUhEUg...']
+     */
+    pngBase64Images: string[];
+}
+/**
+ * Options for warming up the on-device LLM.
+ *
+ * @since 1.0.0
+ */
+export interface WarmupOptions {
+    /**
+     * The session identifier for the warmup.
+     *
+     * This identifier will be associated with the warmed-up session,
+     * allowing you to use the same session for subsequent prompts.
+     *
+     * @since 1.0.0
+     * @platform ios
+     */
+    sessionId: string;
+    /**
+     * The prompt prefix to use for warming up the LLM.
+     *
+     * This text will be used to pre-initialize the model, reducing latency
+     * for subsequent prompts with similar prefixes.
+     *
+     * @since 1.0.0
+     * @platform ios
+     * @example 'You are a helpful assistant that provides concise answers.'
+     */
+    promptPrefix?: string;
+}
