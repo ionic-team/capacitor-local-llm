@@ -349,7 +349,9 @@ export type LocalLLMErrorCode =
   /** The method was called on the web platform, which is not supported. */
   | 'LOCAL_LLM_WEB_NOT_SUPPORTED'
   /** Image generation failed (e.g. no available generation style). */
-  | 'LOCAL_LLM_IMAGE_GENERATION_FAILED';
+  | 'LOCAL_LLM_IMAGE_GENERATION_FAILED'
+  /** An unexpected error was thrown by the underlying platform SDK. Check the error message for details. */
+  | 'LOCAL_LLM_UNKNOWN_ERROR';
 
 /**
  * Error thrown by the LocalLLM plugin, carrying a machine-readable `code`.

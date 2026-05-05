@@ -15,6 +15,12 @@ import { LocalLLM } from "@capacitor/local-llm";
 
 import './Tab2.css';
 
+const formatError = (err: unknown): string => {
+  const message = (err as Error).message ?? 'Unknown error';
+  const code = (err as any).code;
+  return code ? `[${code}] ${message}` : message;
+};
+
 interface SelectedImage {
   id: string;
   file: File;
@@ -49,7 +55,7 @@ const Tab2: React.FC = () => {
         onDownloadingModel();
       }
     } catch (err) {
-      setError((err as Error).message);
+      setError(formatError(err));
     }
   };
 
@@ -96,14 +102,14 @@ const Tab2: React.FC = () => {
           setSystemStatus(res.status);
         } catch (err) {
           if (interval) clearInterval(interval);
-          setError((err as Error).message);
+          setError(formatError(err));
         }
       }, 1000);
       await LocalLLM.download();
       clearInterval(interval);
     } catch (err) {
       if (interval) clearInterval(interval);
-      setError((err as Error).message);
+      setError(formatError(err));
     }
   };
 
@@ -123,7 +129,7 @@ const Tab2: React.FC = () => {
 
       setGeneratedImages(res.pngBase64Images);
     } catch (err: unknown) {
-      setError((err as Error).message);
+      setError(formatError(err));
     } finally {
       setAwaitingResponse(false);
     }

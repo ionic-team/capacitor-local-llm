@@ -62,7 +62,7 @@ public class LocalLLMPlugin: CAPPlugin, CAPBridgedPlugin {
         if let llmError = error as? LocalLLMError {
             call.reject(llmError.errorDescription ?? "Unknown error", llmError.errorCode)
         } else {
-            call.reject(error.localizedDescription)
+            call.reject(error.localizedDescription, "LOCAL_LLM_UNKNOWN_ERROR")
         }
     }
 

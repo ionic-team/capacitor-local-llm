@@ -16,6 +16,12 @@ import { LocalLLM } from "@capacitor/local-llm";
 
 import './Tab1.css';
 
+const formatError = (err: unknown): string => {
+  const message = (err as Error).message ?? 'Unknown error';
+  const code = (err as any).code;
+  return code ? `[${code}] ${message}` : message;
+};
+
 const statusColor = (status: string): string => {
   switch (status) {
     case 'available': return 'success';
@@ -48,7 +54,7 @@ const Tab1: React.FC = () => {
         onDownloadingModel();
       }
     } catch (err) {
-      setResponse((err as Error).message);
+      setResponse(formatError(err));
     }
   };
 
@@ -65,7 +71,7 @@ const Tab1: React.FC = () => {
     } catch (err) {
       availabilityListenerRef.current?.remove();
       availabilityListenerRef.current = null;
-      setResponse((err as Error).message);
+      setResponse(formatError(err));
     }
   };
 
@@ -80,7 +86,7 @@ const Tab1: React.FC = () => {
       });
       setResponse(res.text);
     } catch (err: unknown) {
-      setResponse((err as Error).message);
+      setResponse(formatError(err));
     } finally {
       setAwaitingResponse(false);
     }

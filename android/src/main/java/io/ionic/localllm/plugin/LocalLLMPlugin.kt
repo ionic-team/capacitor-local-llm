@@ -66,7 +66,7 @@ class LocalLLMPlugin : Plugin() {
     }
 
   private fun PluginCall.rejectWithError(ex: Exception) {
-      reject(ex.message, (ex as? LocalLLMError)?.code)
+      reject(ex.message, (ex as? LocalLLMError)?.code ?: "LOCAL_LLM_UNKNOWN_ERROR")
   }
 
   @PluginMethod fun systemAvailability(call: PluginCall) {
