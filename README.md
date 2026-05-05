@@ -400,7 +400,7 @@ Options for warming up the on-device LLM.
 
 Availability status of the on-device LLM.
 
-<code>'available' | 'unavailable' | 'notready' | 'downloadable' | 'responding'</code>
+<code>'available' | 'unavailable' | 'notready' | 'downloadable'</code>
 
 
 #### SystemAvailabilityChangeListener
