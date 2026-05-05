@@ -124,7 +124,10 @@ class LocalLLMPlugin : Plugin() {
     fun generateImage(call: PluginCall) {
         runBlocking {
             try {
-                val prompt = call.getString("prompt") ?: throw LocalLLMError.MissingParameter("prompt")
+                val prompt = call.getString("prompt")
+                if (prompt.isNullOrBlank()) {
+                    throw LocalLLMError.MissingParameter("prompt")
+                }
                 val count = call.getInt("count", 1) ?: 1
 
                 val impl = this@LocalLLMPlugin.implementation ?: throw LocalLLMError.Uninitialized()
@@ -139,7 +142,10 @@ class LocalLLMPlugin : Plugin() {
     @PluginMethod
     fun endSession(call: PluginCall) {
         try {
-            val sessionId = call.getString("sessionId") ?: throw LocalLLMError.MissingParameter("sessionId")
+            val sessionId = call.getString("sessionId")
+            if (sessionId.isNullOrBlank()) {
+                throw LocalLLMError.MissingParameter("sessionId")
+            }
             val impl = this@LocalLLMPlugin.implementation ?: throw LocalLLMError.Uninitialized()
             impl.endSession(sessionId)
             call.resolve()
@@ -153,7 +159,9 @@ class LocalLLMPlugin : Plugin() {
             sessionId = call.getString("sessionId"),
             instructions = call.getString("instructions"),
             options = getLLMOptionsFromCall(call),
-            prompt = call.getString("prompt")!!
+            prompt = call.getString("prompt")
+                ?.takeIf { it.isNotBlank() }
+                ?: throw LocalLLMError.MissingParameter("prompt")
         )
     }
 
