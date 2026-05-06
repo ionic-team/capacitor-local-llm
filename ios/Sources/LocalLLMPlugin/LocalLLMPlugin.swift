@@ -11,9 +11,9 @@ public class LocalLLMPlugin: CAPPlugin, CAPBridgedPlugin {
             name: "systemAvailability",
             returnType: CAPPluginReturnPromise
         ),
-        CAPPluginMethod(name: "warmup", returnType: CAPPluginReturnNone),
+        CAPPluginMethod(name: "warmup", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "prompt", returnType: CAPPluginReturnPromise),
-        CAPPluginMethod(name: "endSession", returnType: CAPPluginReturnNone),
+        CAPPluginMethod(name: "endSession", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "generateImage", returnType: CAPPluginReturnPromise)
     ]
 
