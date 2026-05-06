@@ -31,6 +31,7 @@ public enum LocalLLMError: LocalizedError, CustomNSError {
     case unavailable
     case missingParameter(String)
     case imageGenerationFailed
+    case featureNotSupported(String)
 
     public var errorCode: String {
         switch self {
@@ -42,6 +43,7 @@ public enum LocalLLMError: LocalizedError, CustomNSError {
         case .unavailable: return "LOCAL_LLM_UNAVAILABLE"
         case .missingParameter: return "LOCAL_LLM_MISSING_PARAMETER"
         case .imageGenerationFailed: return "LOCAL_LLM_IMAGE_GENERATION_FAILED"
+        case .featureNotSupported: return "LOCAL_LLM_FEATURE_NOT_SUPPORTED_ON_IOS"
         }
     }
 
@@ -63,6 +65,9 @@ public enum LocalLLMError: LocalizedError, CustomNSError {
             return "\(name) is required"
         case .imageGenerationFailed:
             return "Image generation failed"
+        case .featureNotSupported(let feature):
+            return "\(feature) is not supported on iOS"
+                                
         }
     }
 

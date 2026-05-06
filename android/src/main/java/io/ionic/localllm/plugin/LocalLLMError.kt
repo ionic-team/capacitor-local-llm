@@ -7,5 +7,5 @@ sealed class LocalLLMError(message: String, val code: String) : Exception(messag
     class NotReady : LocalLLMError("Gemini Nano model is not ready", "LOCAL_LLM_NOT_READY")
     class Unavailable : LocalLLMError("Gemini Nano is currently unavailable", "LOCAL_LLM_UNAVAILABLE")
     class MissingParameter(name: String) : LocalLLMError("$name is required", "LOCAL_LLM_MISSING_PARAMETER")
-    class ImageGenerationFailed : LocalLLMError("Image generation is not supported on Android", "LOCAL_LLM_IMAGE_GENERATION_FAILED")
+    class FeaturedNotSupported(feature: String) : LocalLLMError("This feature is not supported on Android: $feature", "LOCAL_LLM_FEATURE_NOT_SUPPORTED_ON_ANDROID")
 }

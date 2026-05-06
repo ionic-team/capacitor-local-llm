@@ -118,7 +118,7 @@ class LocalLLM {
     ): String {
         // TODO: Implement image generation using Android's on-device image generation APIs
         // Return base64-encoded PNG image string
-        throw LocalLLMError.ImageGenerationFailed()
+        throw LocalLLMError.FeaturedNotSupported("image generation")
     }
 
     private suspend fun checkAvailability() {

@@ -58,13 +58,11 @@ public class LocalLLMPlugin: CAPPlugin, CAPBridgedPlugin {
         ])
     }
 
-    private func rejectCall(_ call: CAPPluginCall, _ error: Error) {
-        if let llmError = error as? LocalLLMError {
-            call.reject(llmError.errorDescription ?? "Unknown error", llmError.errorCode)
-        } else {
-            call.reject(error.localizedDescription, "LOCAL_LLM_UNKNOWN_ERROR")
-        }
-    }
+    
+  
+  @objc func download(_ call: CAPPluginCall) {
+    rejectCall(call, LocalLLMError.featureNotSupported("model download"))
+  }
 
     @objc func warmup(_ call: CAPPluginCall) {
         do {
@@ -198,5 +196,13 @@ public class LocalLLMPlugin: CAPPlugin, CAPBridgedPlugin {
             temperature: optionsObject["temperature"] as? Double,
             maximumOutputTokens: optionsObject["maximumOutputTokens"] as? Int,
             )
+    }
+  
+    private func rejectCall(_ call: CAPPluginCall, _ error: Error) {
+        if let llmError = error as? LocalLLMError {
+            call.reject(llmError.errorDescription ?? "Unknown error", llmError.errorCode)
+        } else {
+            call.reject(error.localizedDescription, "LOCAL_LLM_UNKNOWN_ERROR")
+        }
     }
 }
