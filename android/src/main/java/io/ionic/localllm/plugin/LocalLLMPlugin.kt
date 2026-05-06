@@ -19,6 +19,7 @@ class LocalLLMPlugin : Plugin() {
   private var implementation: LocalLLM? = null
   private val pollingScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
   private var availabilityPollingJob: Job? = null
+    private val coroutineScope = CoroutineScope(Dispatchers.Main)
 
     override fun load() {
         super.load()
@@ -70,7 +71,7 @@ class LocalLLMPlugin : Plugin() {
   }
 
   @PluginMethod fun systemAvailability(call: PluginCall) {
-      runBlocking {
+      coroutineScope.launch {
           try {
               val impl = this@LocalLLMPlugin.implementation ?: throw LocalLLMError.Uninitialized()
               call.resolve(JSObject().put("status", impl.availability().value))
@@ -81,7 +82,7 @@ class LocalLLMPlugin : Plugin() {
   }
 
     @PluginMethod fun download(call: PluginCall) {
-        runBlocking {
+        coroutineScope.launch {
             try {
                 val impl = this@LocalLLMPlugin.implementation ?: throw LocalLLMError.Uninitialized()
                 impl.download()
@@ -94,7 +95,7 @@ class LocalLLMPlugin : Plugin() {
 
     @PluginMethod
     fun warmup(call: PluginCall) {
-        runBlocking {
+        coroutineScope.launch {
             try {
                 val impl = this@LocalLLMPlugin.implementation ?: throw LocalLLMError.Uninitialized()
                 impl.warmup()
@@ -107,7 +108,7 @@ class LocalLLMPlugin : Plugin() {
 
   @PluginMethod
   fun prompt(call: PluginCall) {
-      runBlocking {
+      coroutineScope.launch {
           try {
               val options = getLLMPromptOptionsFromCall(call)
 
@@ -122,7 +123,7 @@ class LocalLLMPlugin : Plugin() {
 
     @PluginMethod
     fun generateImage(call: PluginCall) {
-        runBlocking {
+        coroutineScope.launch {
             try {
                 val prompt = call.getString("prompt")
                 if (prompt.isNullOrBlank()) {
