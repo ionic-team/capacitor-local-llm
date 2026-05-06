@@ -1,6 +1,7 @@
 package io.ionic.localllm.plugin
 
 import com.getcapacitor.JSObject
+import com.getcapacitor.Logger
 import com.getcapacitor.Plugin
 import com.getcapacitor.PluginCall
 import com.getcapacitor.PluginMethod
@@ -50,11 +51,13 @@ class LocalLLMPlugin : Plugin() {
             var lastAvailability: LLMAvailability? = null
             while (isActive) {
                 val impl = implementation ?: break
-                val current = impl.availability()
-                if (current != lastAvailability) {
-                    lastAvailability = current
-                    notifyListeners("systemAvailabilityChange", JSObject().put("status", current.value))
+                var current = LLMAvailability.Unavailable
+                try {
+                    current = impl.availability()
+                } catch (ex: Exception) {
+                    Logger.error("Failed to retrieve LLM availability", ex)
                 }
+                notifyListeners("systemAvailabilityChange", JSObject().put("status", current.value))
                 delay(2000)
             }
         }
@@ -94,12 +97,16 @@ class LocalLLMPlugin : Plugin() {
 
     @PluginMethod
     fun warmup(call: PluginCall) {
+        Logger.debug("LocalLLM", "warmup method called")
         runBlocking {
             try {
                 val impl = this@LocalLLMPlugin.implementation ?: throw LocalLLMError.Uninitialized()
+                Logger.debug("LocalLLM", "start model warmup")
                 impl.warmup()
+                Logger.debug("LocalLLM", "start model warmup")
                 call.resolve()
             } catch (ex: Exception) {
+                Logger.error("failed to warmup model", ex)
                 call.rejectWithError(ex)
             }
         }

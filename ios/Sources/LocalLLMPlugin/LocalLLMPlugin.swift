@@ -11,9 +11,9 @@ public class LocalLLMPlugin: CAPPlugin, CAPBridgedPlugin {
             name: "systemAvailability",
             returnType: CAPPluginReturnPromise
         ),
-        CAPPluginMethod(name: "warmup", returnType: CAPPluginReturnNone),
+        CAPPluginMethod(name: "warmup", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "prompt", returnType: CAPPluginReturnPromise),
-        CAPPluginMethod(name: "endSession", returnType: CAPPluginReturnNone),
+        CAPPluginMethod(name: "endSession", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "generateImage", returnType: CAPPluginReturnPromise)
     ]
 
@@ -38,10 +38,7 @@ public class LocalLLMPlugin: CAPPlugin, CAPBridgedPlugin {
             var lastAvailability: LLMAvailability?
             while !Task.isCancelled {
                 let current = LocalLLM.availability()
-                if current != lastAvailability {
-                    lastAvailability = current
-                    notifyListeners("systemAvailabilityChange", data: ["status": current.rawValue])
-                }
+                notifyListeners("systemAvailabilityChange", data: ["status": current.rawValue])
                 try? await Task.sleep(nanoseconds: 2_000_000_000)
             }
         }
