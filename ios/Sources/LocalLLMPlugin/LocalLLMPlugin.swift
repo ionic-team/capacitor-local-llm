@@ -112,7 +112,7 @@ public class LocalLLMPlugin: CAPPlugin, CAPBridgedPlugin {
             call.reject("prompt is required")
             return
         }
-        let count = call.getInt("count", 1)
+        let count = max(1, call.getInt("count", 1))
         let promptImages: [String] =
             call.getArray("promptImages")?.compactMap({ val in
                 return val as? String
