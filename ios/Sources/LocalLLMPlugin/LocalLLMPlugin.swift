@@ -68,7 +68,7 @@ public class LocalLLMPlugin: CAPPlugin, CAPBridgedPlugin {
 
     @objc func warmup(_ call: CAPPluginCall) {
         do {
-            guard let sessionId = call.getString("sessionId") else {
+            guard let sessionId = call.getString("sessionId"), !sessionId.isEmpty else {
                 throw LocalLLMError.missingParameter("sessionId")
             }
 
@@ -107,7 +107,7 @@ public class LocalLLMPlugin: CAPPlugin, CAPBridgedPlugin {
 
     @objc func endSession(_ call: CAPPluginCall) {
         do {
-            guard let sessionId = call.getString("sessionId") else {
+            guard let sessionId = call.getString("sessionId"), !sessionId.isEmpty else {
                 throw LocalLLMError.missingParameter("sessionId")
             }
 
@@ -119,7 +119,7 @@ public class LocalLLMPlugin: CAPPlugin, CAPBridgedPlugin {
     }
 
     @objc func generateImage(_ call: CAPPluginCall) {
-        guard let prompt = call.getString("prompt") else {
+        guard let prompt = call.getString("prompt"), !prompt.isEmpty else {
             rejectCall(call, LocalLLMError.missingParameter("prompt"))
             return
         }
