@@ -67,7 +67,7 @@ public enum LocalLLMError: LocalizedError, CustomNSError {
             return "Image generation failed"
         case .featureNotSupported(let feature):
             return "\(feature) is not supported on iOS"
-                                
+
         }
     }
 
