@@ -19,6 +19,7 @@ public class LocalLLMPlugin: CAPPlugin, CAPBridgedPlugin {
 
     private let implementation = LocalLLM()
     private var availabilityPollingTask: Task<Void, Never>?
+    private var forceAvailabilityListenerUpdate = false
 
     override public func load() {
 
@@ -37,13 +38,19 @@ public class LocalLLMPlugin: CAPPlugin, CAPBridgedPlugin {
     }
 
     private func startAvailabilityPolling() {
-        guard availabilityPollingTask == nil else { return }
+        guard availabilityPollingTask == nil else {
+            // set this to true to allow notifying newly added listener in web at least once
+            //  otherwise, if lastAvailability doesn't change, the new listener would never receive data.
+            forceAvailabilityListenerUpdate = true
+            return
+        }
         availabilityPollingTask = Task {
             var lastAvailability: LLMAvailability?
             while !Task.isCancelled {
                 let current = LocalLLM.availability()
-                if current != lastAvailability {
+                if current != lastAvailability || forceAvailabilityListenerUpdate {
                     lastAvailability = current
+                    forceAvailabilityListenerUpdate = false
                     notifyListeners("systemAvailabilityChange", data: ["status": current.rawValue])
                 }
                 try? await Task.sleep(nanoseconds: 2_000_000_000)
