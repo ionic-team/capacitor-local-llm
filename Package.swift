@@ -3,7 +3,7 @@ import PackageDescription
 
 let package = Package(
     name: "CapacitorLocalLlm",
-    platforms: [.iOS("18.4.0")],
+    platforms: [.iOS(.v15)],
     products: [
         .library(
             name: "CapacitorLocalLlm",
