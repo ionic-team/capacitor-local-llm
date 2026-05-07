@@ -129,6 +129,38 @@ const { pngBase64Images } = await LocalLLM.generateImage({
 const src = `data:image/png;base64,${pngBase64Images[0]}`;
 ```
 
+## Error Handling
+
+All plugin methods throw a `LocalLLMException` on failure. It extends `Error` and adds a machine-readable `code` property of type `LocalLLMErrorCode`.
+
+```typescript
+import { LocalLLM, LocalLLMException } from '@capacitor/local-llm';
+
+try {
+  await LocalLLM.prompt({ prompt: 'Hello' });
+} catch (err) {
+  if (err instanceof LocalLLMException) {
+    console.log(err.code);    // e.g. 'LOCAL_LLM_NOT_ENABLED'
+    console.log(err.message); // human-readable description
+  }
+}
+```
+
+### `LocalLLMErrorCode`
+
+| Code | Description |
+|------|-------------|
+| `LOCAL_LLM_UNSUPPORTED_PLATFORM` | The current OS version or device hardware does not support on-device LLMs. |
+| `LOCAL_LLM_NOT_ENABLED` | The on-device AI feature is supported but has not been enabled by the user (e.g. Apple Intelligence). |
+| `LOCAL_LLM_NOT_READY` | The model exists on the device but is still downloading or initializing. |
+| `LOCAL_LLM_UNAVAILABLE` | The model is unavailable for an unclassified reason. |
+| `LOCAL_LLM_RESPONSE_IN_PROGRESS` | A prompt was sent to a session that is already generating a response. |
+| `LOCAL_LLM_NOT_INITIALIZED` | The plugin implementation was not initialized. This should not occur under normal conditions. |
+| `LOCAL_LLM_MISSING_PARAMETER` | A required call parameter was missing (e.g. `sessionId`, `prompt`). |
+| `LOCAL_LLM_WEB_NOT_SUPPORTED` | The method was called on the web platform, which is not supported. |
+| `LOCAL_LLM_IMAGE_GENERATION_FAILED` | Image generation failed (e.g. no available generation style). |
+| `LOCAL_LLM_UNKNOWN_ERROR` | An unexpected error was thrown by the underlying platform SDK. Check `err.message` for details. |
+
 ## API
 
 <docgen-index>
