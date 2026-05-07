@@ -49,7 +49,11 @@ class LocalLLMPlugin : Plugin() {
         availabilityPollingJob = pollingScope.launch {
             var lastAvailability: LLMAvailability? = null
             while (isActive) {
-                val impl = implementation ?: break
+                val impl = implementation
+                if (impl == null) {
+                    delay(1000)
+                    continue
+                }
                 val current = impl.availability()
                 if (current != lastAvailability) {
                     lastAvailability = current
