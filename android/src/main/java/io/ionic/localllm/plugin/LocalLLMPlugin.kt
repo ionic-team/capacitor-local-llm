@@ -20,6 +20,7 @@ class LocalLLMPlugin : Plugin() {
   private var implementation: LocalLLM? = null
   private val pollingScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
   private var availabilityPollingJob: Job? = null
+    private var forceAvailabilityListenerUpdate = false
 
     override fun load() {
         super.load()
@@ -46,7 +47,12 @@ class LocalLLMPlugin : Plugin() {
     }
 
     private fun startAvailabilityPolling() {
-        if (availabilityPollingJob?.isActive == true) return
+        if (availabilityPollingJob?.isActive == true) {
+            // set this to true to allow notifying newly added listener in web at least once
+            //  otherwise, if lastAvailability doesn't change, the new listener would never receive data.
+            forceAvailabilityListenerUpdate = true
+            return
+        }
         availabilityPollingJob = pollingScope.launch {
             var lastAvailability: LLMAvailability? = null
             while (isActive) {
@@ -61,8 +67,9 @@ class LocalLLMPlugin : Plugin() {
                 } catch (ex: Exception) {
                     Logger.warn("LocalLLMPlugin", "Failed to retrieve LLM availability ${ex.localizedMessage}")
                 }
-                if (current != lastAvailability) {
+                if (current != lastAvailability || forceAvailabilityListenerUpdate) {
                     lastAvailability = current
+                    forceAvailabilityListenerUpdate = false
                     notifyListeners("systemAvailabilityChange", JSObject().put("status", current.value))
                 }
                 delay(2000)
