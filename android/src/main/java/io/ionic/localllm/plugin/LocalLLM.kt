@@ -19,23 +19,35 @@ class LocalLLM {
     private val sessions: MutableMap<String, ChatSession> = mutableMapOf()
 
     suspend fun availability(): LLMAvailability {
-        val status = model.checkStatus()
-        when (status) {
-            FeatureStatus.UNAVAILABLE -> {
-                return LLMAvailability.Unavailable
-            }
-            FeatureStatus.DOWNLOADABLE -> {
-                return LLMAvailability.Downloadable
-            }
-            FeatureStatus.DOWNLOADING -> {
-                return LLMAvailability.NotReady
-            }
-            FeatureStatus.AVAILABLE -> {
-                return LLMAvailability.Available
-            }
-        }
+        try {
+            val status = model.checkStatus()
+            when (status) {
+                FeatureStatus.UNAVAILABLE -> {
+                    return LLMAvailability.Unavailable
+                }
 
-        return LLMAvailability.Unavailable
+                FeatureStatus.DOWNLOADABLE -> {
+                    return LLMAvailability.Downloadable
+                }
+
+                FeatureStatus.DOWNLOADING -> {
+                    return LLMAvailability.NotReady
+                }
+
+                FeatureStatus.AVAILABLE -> {
+                    return LLMAvailability.Available
+                }
+            }
+            return LLMAvailability.Unavailable
+        } catch(ex: com.google.mlkit.genai.common.GenAiException) {
+            if (ex.errorCode == 8) {
+                throw LocalLLMError.UnsupportedPlatform()
+            }
+
+            throw ex
+        } catch (ex: Exception) {
+            throw ex
+        }
     }
 
     suspend fun download() {
