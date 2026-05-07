@@ -1,6 +1,7 @@
 package io.ionic.localllm.plugin
 
 import com.getcapacitor.JSObject
+import com.getcapacitor.Logger
 import com.getcapacitor.Plugin
 import com.getcapacitor.PluginCall
 import com.getcapacitor.PluginMethod
@@ -54,7 +55,12 @@ class LocalLLMPlugin : Plugin() {
                     delay(1000)
                     continue
                 }
-                val current = impl.availability()
+                var current = LLMAvailability.Unavailable
+                try {
+                    current = impl.availability()
+                } catch (ex: Exception) {
+                    Logger.warn("LocalLLMPlugin", "Failed to retrieve LLM availability ${ex.localizedMessage}")
+                }
                 if (current != lastAvailability) {
                     lastAvailability = current
                     notifyListeners("systemAvailabilityChange", JSObject().put("status", current.value))
