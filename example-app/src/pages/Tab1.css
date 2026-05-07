@@ -1,0 +1,18 @@
+.container {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  padding: 16px;
+}
+
+.response {
+  white-space: pre-wrap;
+  font-size: 15px;
+  line-height: 1.5;
+}

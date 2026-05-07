@@ -19,10 +19,11 @@ class LocalLLMPlugin : Plugin() {
   private var implementation: LocalLLM? = null
   private val pollingScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
   private var availabilityPollingJob: Job? = null
+    private val coroutineScope = CoroutineScope(Dispatchers.Main)
 
     override fun load() {
         super.load()
-        implementation = LocalLLM(context)
+        implementation = LocalLLM()
     }
 
     @PluginMethod(returnType = PluginMethod.RETURN_CALLBACK)
@@ -65,73 +66,76 @@ class LocalLLMPlugin : Plugin() {
         availabilityPollingJob = null
     }
 
+  private fun PluginCall.rejectWithError(ex: Exception) {
+      reject(ex.message, (ex as? LocalLLMError)?.code ?: "LOCAL_LLM_UNKNOWN_ERROR")
+  }
+
   @PluginMethod fun systemAvailability(call: PluginCall) {
-      runBlocking {
+      coroutineScope.launch {
           try {
-              val impl = this@LocalLLMPlugin.implementation ?: throw Exception("LocalLLM not initialized")
+              val impl = this@LocalLLMPlugin.implementation ?: throw LocalLLMError.Uninitialized()
               call.resolve(JSObject().put("status", impl.availability().value))
           } catch (ex: Exception) {
-              call.reject(ex.message)
+              call.rejectWithError(ex)
           }
       }
   }
 
     @PluginMethod fun download(call: PluginCall) {
-        runBlocking {
+        coroutineScope.launch {
             try {
-                val impl = this@LocalLLMPlugin.implementation ?: throw Exception("LocalLLM not initialized")
+                val impl = this@LocalLLMPlugin.implementation ?: throw LocalLLMError.Uninitialized()
                 impl.download()
                 call.resolve()
             } catch (ex: Exception) {
-                call.reject(ex.message)
+                call.rejectWithError(ex)
             }
         }
     }
 
     @PluginMethod
     fun warmup(call: PluginCall) {
-        runBlocking {
+        coroutineScope.launch {
             try {
-                var impl = this@LocalLLMPlugin.implementation ?: throw Exception("LocalLLM not initialized")
+                val impl = this@LocalLLMPlugin.implementation ?: throw LocalLLMError.Uninitialized()
                 impl.warmup()
+                call.resolve()
             } catch (ex: Exception) {
-                call.reject(ex.message)
+                call.rejectWithError(ex)
             }
         }
     }
 
   @PluginMethod
   fun prompt(call: PluginCall) {
-      runBlocking {
+      coroutineScope.launch {
           try {
               val options = getLLMPromptOptionsFromCall(call)
 
-              val impl = this@LocalLLMPlugin.implementation ?: throw Exception("LocalLLM not initialized")
+              val impl = this@LocalLLMPlugin.implementation ?: throw LocalLLMError.Uninitialized()
               val response = impl.prompt(options)
               call.resolve(JSObject().put("text", response))
           } catch (ex: Exception) {
-              call.reject(ex.message)
+              call.rejectWithError(ex)
           }
       }
   }
 
     @PluginMethod
     fun generateImage(call: PluginCall) {
-        runBlocking {
+        coroutineScope.launch {
             try {
                 val prompt = call.getString("prompt")
-                if (prompt == null) {
-                    call.reject("prompt is required")
-                    return@runBlocking
+                if (prompt.isNullOrBlank()) {
+                    throw LocalLLMError.MissingParameter("prompt")
                 }
-
                 val count = call.getInt("count", 1) ?: 1
 
-                val impl = this@LocalLLMPlugin.implementation ?: throw Exception("LocalLLM not initialized")
+                val impl = this@LocalLLMPlugin.implementation ?: throw LocalLLMError.Uninitialized()
                 val base64Image = impl.generateImage(prompt, count)
                 call.resolve(JSObject().put("base64Image", base64Image))
             } catch (ex: Exception) {
-                call.reject(ex.message)
+                call.rejectWithError(ex)
             }
         }
     }
@@ -140,16 +144,14 @@ class LocalLLMPlugin : Plugin() {
     fun endSession(call: PluginCall) {
         try {
             val sessionId = call.getString("sessionId")
-            if (sessionId == null) {
-                call.reject("sessionId is required")
-                return
+            if (sessionId.isNullOrBlank()) {
+                throw LocalLLMError.MissingParameter("sessionId")
             }
-
-            val impl = this@LocalLLMPlugin.implementation ?: throw Exception("LocalLLM not initialized")
+            val impl = this@LocalLLMPlugin.implementation ?: throw LocalLLMError.Uninitialized()
             impl.endSession(sessionId)
             call.resolve()
         } catch (ex: Exception) {
-            call.reject(ex.message)
+            call.rejectWithError(ex)
         }
     }
 
@@ -158,7 +160,9 @@ class LocalLLMPlugin : Plugin() {
             sessionId = call.getString("sessionId"),
             instructions = call.getString("instructions"),
             options = getLLMOptionsFromCall(call),
-            prompt = call.getString("prompt")!!
+            prompt = call.getString("prompt")
+                ?.takeIf { it.isNotBlank() }
+                ?: throw LocalLLMError.MissingParameter("prompt")
         )
     }
 
@@ -167,8 +171,8 @@ class LocalLLMPlugin : Plugin() {
 
         if (optionsObject!= null) {
             return LLMOptions(
-                temperature = optionsObject.optDouble("temperature")?.toFloat(),
-                maxOutputTokens =  optionsObject.optInt("maximumOutputTokens").coerceIn(1, 256)
+                temperature = optionsObject.optDouble("temperature").takeIf { !it.isNaN() }?.toFloat()?.coerceIn(0f, 1f),
+                maxOutputTokens =  optionsObject.optInt("maximumOutputTokens").takeIf { it > 0 }?.coerceIn(1, 256)
             )
         }
 
