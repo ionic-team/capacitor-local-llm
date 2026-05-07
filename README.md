@@ -407,6 +407,6 @@ Availability status of the on-device LLM.
 
 Callback invoked when the on-device LLM availability status changes.
 
-<code>(availability: <a href="#llmavailability">LLMAvailability</a>): void</code>
+<code>(response: <a href="#systemavailabilityresponse">SystemAvailabilityResponse</a>): void</code>
 
 </docgen-api>
