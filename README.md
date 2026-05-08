@@ -19,7 +19,7 @@ npx cap sync
 | Platform | Minimum OS | Notes |
 |----------|------------|-------|
 | iOS | **15** | Image generation requires iOS 18.4+. Text LLM (Foundation Models / Apple Intelligence) requires iOS 26+. |
-| Android | **8 (API 26)** | Gemini Nano via ML Kit requires a device that supports on-device AI (e.g. Pixel 9+). |
+| Android | **9 (API 28)** | Gemini Nano via ML Kit requires a device that supports on-device AI (e.g. Pixel 9+). |
 
 ## iOS Setup
 
@@ -31,11 +31,11 @@ On iOS 18 and below, `systemAvailability()` returns `'unavailable'` for the text
 
 ## Android Setup
 
-The plugin's minimum android SDK is 26, higher than Capacitor's current minimum (24). You'll need to change the `android/variables.gradle` file in your application:
+The plugin's minimum android SDK is 28, higher than Capacitor's current minimum (24). You'll need to change the `android/variables.gradle` file in your application:
 
 ```gradle
 ext {
-    minSdkVersion = 26
+    minSdkVersion = 28
 }
 ```
 
@@ -70,7 +70,7 @@ if (status === 'downloadable') {
 - **`maximumOutputTokens` is clamped to 1–256** by the ML Kit API. Values outside this range will be coerced.
 - **Multi-turn session context is managed in-memory** by manually assembling conversation history into each prompt. It is not a native session API and does not persist across app restarts.
 - **`warmup()` ignores `sessionId` and `promptPrefix`** on Android — it warms up the model globally.
-- **Not all Android 8+ devices support Gemini Nano.** The device must have a compatible on-device AI chip (e.g. Pixel 9 and later). [More information here](https://developers.google.com/ml-kit/genai#device-support).
+- **Not all Android 9+ devices support Gemini Nano.** The device must have a compatible on-device AI chip (e.g. Pixel 9 and later). [More information here](https://developers.google.com/ml-kit/genai#device-support).
 - **On-device models cannot be used while the app is in the background.** Inference requests made while the app is backgrounded will fail.
 - **AICore enforces an inference quota per app.** Making too many requests in a short period will result in an `BUSY` error response — consider exponential backoff when retrying. An `PER_APP_BATTERY_USE_QUOTA_EXCEEDED` error can be returned if an app exceeds a longer-duration quota (e.g. a daily limit).
 
