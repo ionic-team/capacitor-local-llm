@@ -147,9 +147,9 @@ export interface LocalLLMPlugin {
  * Callback invoked when the on-device LLM availability status changes.
  *
  * @since 1.0.0
- * @param availability - The new availability status of the LLM
+ * @param response - The response containing the new availability status of the LLM
  */
-export type SystemAvailabilityChangeListener = (availability: LLMAvailability) => void;
+export type SystemAvailabilityChangeListener = (response: SystemAvailabilityResponse) => void;
 
 /**
  * Configuration options for LLM inference behavior.
