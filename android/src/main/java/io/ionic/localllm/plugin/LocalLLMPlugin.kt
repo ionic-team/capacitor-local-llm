@@ -1,6 +1,7 @@
 package io.ionic.localllm.plugin
 
 import com.getcapacitor.JSObject
+import com.getcapacitor.Logger
 import com.getcapacitor.Plugin
 import com.getcapacitor.PluginCall
 import com.getcapacitor.PluginMethod
@@ -19,6 +20,7 @@ class LocalLLMPlugin : Plugin() {
   private var implementation: LocalLLM? = null
   private val pollingScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
   private var availabilityPollingJob: Job? = null
+    private var forceAvailabilityListenerUpdate = false
     private val coroutineScope = CoroutineScope(Dispatchers.Main)
 
     override fun load() {
@@ -46,14 +48,29 @@ class LocalLLMPlugin : Plugin() {
     }
 
     private fun startAvailabilityPolling() {
-        if (availabilityPollingJob?.isActive == true) return
+        if (availabilityPollingJob?.isActive == true) {
+            // set this to true to allow notifying newly added listener in web at least once
+            //  otherwise, if lastAvailability doesn't change, the new listener would never receive data.
+            forceAvailabilityListenerUpdate = true
+            return
+        }
         availabilityPollingJob = pollingScope.launch {
             var lastAvailability: LLMAvailability? = null
             while (isActive) {
-                val impl = implementation ?: break
-                val current = impl.availability()
-                if (current != lastAvailability) {
+                val impl = implementation
+                if (impl == null) {
+                    delay(1000)
+                    continue
+                }
+                var current = LLMAvailability.Unavailable
+                try {
+                    current = impl.availability()
+                } catch (ex: Exception) {
+                    Logger.warn("LocalLLMPlugin", "Failed to retrieve LLM availability ${ex.localizedMessage}")
+                }
+                if (current != lastAvailability || forceAvailabilityListenerUpdate) {
                     lastAvailability = current
+                    forceAvailabilityListenerUpdate = false
                     notifyListeners("systemAvailabilityChange", JSObject().put("status", current.value))
                 }
                 delay(2000)
