@@ -14,28 +14,40 @@ data class ChatSession(
     val history: MutableList<Pair<String, String>> = mutableListOf()
 )
 
-class LocalLLM(private val context: android.content.Context) {
+class LocalLLM {
     val model: GenerativeModel = Generation.getClient()
     private val sessions: MutableMap<String, ChatSession> = mutableMapOf()
 
     suspend fun availability(): LLMAvailability {
-        val status = model.checkStatus()
-        when (status) {
-            FeatureStatus.UNAVAILABLE -> {
-                return LLMAvailability.Unavailable
-            }
-            FeatureStatus.DOWNLOADABLE ->{
-                return LLMAvailability.Downloadable
-            }
-            FeatureStatus.DOWNLOADING -> {
-                return LLMAvailability.NotReady
-            }
-            FeatureStatus.AVAILABLE -> {
-                return LLMAvailability.Available
-            }
-        }
+        try {
+            val status = model.checkStatus()
+            when (status) {
+                FeatureStatus.UNAVAILABLE -> {
+                    return LLMAvailability.Unavailable
+                }
 
-        return LLMAvailability.Unavailable
+                FeatureStatus.DOWNLOADABLE -> {
+                    return LLMAvailability.Downloadable
+                }
+
+                FeatureStatus.DOWNLOADING -> {
+                    return LLMAvailability.NotReady
+                }
+
+                FeatureStatus.AVAILABLE -> {
+                    return LLMAvailability.Available
+                }
+            }
+            return LLMAvailability.Unavailable
+        } catch(ex: com.google.mlkit.genai.common.GenAiException) {
+            if (ex.errorCode == 8) {
+                throw LocalLLMError.UnsupportedPlatform()
+            }
+
+            throw ex
+        } catch (ex: Exception) {
+            throw ex
+        }
     }
 
     suspend fun download() {
@@ -58,6 +70,8 @@ class LocalLLM(private val context: android.content.Context) {
     }
 
     suspend fun prompt(options: LLMPromptOptions): String {
+        this.checkAvailability()
+
         val sessionId = options.sessionId
 
         val fullPrompt = if (sessionId != null) {
@@ -116,6 +130,15 @@ class LocalLLM(private val context: android.content.Context) {
     ): String {
         // TODO: Implement image generation using Android's on-device image generation APIs
         // Return base64-encoded PNG image string
-        throw NotImplementedError("Image generation not yet implemented for Android")
+        throw LocalLLMError.FeaturedNotSupported("image generation")
+    }
+
+    private suspend fun checkAvailability() {
+        when (availability()) {
+            LLMAvailability.Downloadable -> throw LocalLLMError.NotReady()
+            LLMAvailability.NotReady -> throw LocalLLMError.NotReady()
+            LLMAvailability.Unavailable -> throw LocalLLMError.UnsupportedPlatform()
+            LLMAvailability.Available -> return
+        }
     }
 }

@@ -8,7 +8,6 @@ public enum LLMAvailability: String, Sendable {
     case available = "available"
     case unavailable = "unavailable"
     case notReady = "notready"
-    case responding = "responding"
 }
 
 public struct LLMOptions: Sendable {
@@ -23,10 +22,58 @@ public struct LLMPromptOptions: Sendable {
     let prompt: String
 }
 
-public enum LocalLLMError: Error {
+public enum LocalLLMError: LocalizedError, CustomNSError {
+    case uninitialized
     case responseInProgress
-    case sessionNotFound
-    case unsupported
+    case unsupportedPlatform
+    case notEnabled
+    case notReady
+    case unavailable
+    case missingParameter(String)
+    case imageGenerationFailed
+    case featureNotSupported(String)
+
+    public var errorCode: String {
+        switch self {
+        case .uninitialized: return "LOCAL_LLM_NOT_INITIALIZED"
+        case .responseInProgress: return "LOCAL_LLM_RESPONSE_IN_PROGRESS"
+        case .unsupportedPlatform: return "LOCAL_LLM_UNSUPPORTED_PLATFORM"
+        case .notEnabled: return "LOCAL_LLM_NOT_ENABLED"
+        case .notReady: return "LOCAL_LLM_NOT_READY"
+        case .unavailable: return "LOCAL_LLM_UNAVAILABLE"
+        case .missingParameter: return "LOCAL_LLM_MISSING_PARAMETER"
+        case .imageGenerationFailed: return "LOCAL_LLM_IMAGE_GENERATION_FAILED"
+        case .featureNotSupported: return "LOCAL_LLM_FEATURE_NOT_SUPPORTED_ON_IOS"
+        }
+    }
+
+    public var errorDescription: String? {
+        switch self {
+        case .uninitialized:
+            return "LocalLLM not initialized"
+        case .responseInProgress:
+            return "Response is already in progress"
+        case .unsupportedPlatform:
+            return "Apple Intelligence is not supported on this device"
+        case .notEnabled:
+            return "Apple Intelligence has not been enabled"
+        case .notReady:
+            return "Apple Intelligence model is not ready"
+        case .unavailable:
+            return "Apple Intelligence is currently unavailable"
+        case .missingParameter(let name):
+            return "\(name) is required"
+        case .imageGenerationFailed:
+            return "Image generation failed"
+        case .featureNotSupported(let feature):
+            return "\(feature) is not supported on iOS"
+
+        }
+    }
+
+    public var errorUserInfo: [String: Any] {
+        [NSLocalizedDescriptionKey: errorDescription ?? ""]
+    }
 }
 
 public class LocalLLM {
@@ -61,16 +108,19 @@ public class LocalLLM {
 
     func warmup(sessionId: String, promptPrefix: String?) throws {
         if #available(iOS 26.0, *) {
+            try checkAvailabilty()
             let session = getOrCreateSession(sessionId: sessionId, instructions: promptPrefix)
 
             session.prewarm(promptPrefix: .init(promptPrefix))
         } else {
-            throw LocalLLMError.unsupported
+            throw LocalLLMError.unsupportedPlatform
         }
     }
 
     func prompt(options: LLMPromptOptions) async throws -> String {
         if #available(iOS 26.0, *) {
+            try checkAvailabilty()
+
             let session: LanguageModelSession
 
             if let sessionId = options.sessionId {
@@ -96,7 +146,7 @@ public class LocalLLM {
             return response.content
         }
 
-        throw LocalLLMError.unsupported
+        throw LocalLLMError.unsupportedPlatform
     }
 
     func endSession(_ sessionId: String) {
@@ -111,7 +161,7 @@ public class LocalLLM {
         if #available(iOS 18.4, *) {
             let creator = try await ImageCreator()
             guard let style = creator.availableStyles.first else {
-                throw LocalLLMError.unsupported
+                throw LocalLLMError.imageGenerationFailed
             }
 
             var concept: [ImagePlaygroundConcept] = [
@@ -136,7 +186,7 @@ public class LocalLLM {
 
             return imageData
         } else {
-            throw LocalLLMError.unsupported
+            throw LocalLLMError.unsupportedPlatform
         }
     }
 
@@ -168,6 +218,25 @@ public class LocalLLM {
         }
 
         return CGImageSourceCreateImageAtIndex(source, 0, nil)
+    }
+
+    private func checkAvailabilty() throws {
+        if #available(iOS 26.0, *) {
+            switch SystemLanguageModel.default.availability {
+            case .available:
+                return
+            case .unavailable(.deviceNotEligible):
+                throw LocalLLMError.unsupportedPlatform
+            case .unavailable(.appleIntelligenceNotEnabled):
+                throw LocalLLMError.notEnabled
+            case .unavailable(.modelNotReady):
+                throw LocalLLMError.notReady
+            case .unavailable:
+                throw LocalLLMError.unavailable
+            }
+        } else {
+            throw LocalLLMError.unsupportedPlatform
+        }
     }
 }
 

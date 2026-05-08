@@ -11,19 +11,17 @@ public class LocalLLMPlugin: CAPPlugin, CAPBridgedPlugin {
             name: "systemAvailability",
             returnType: CAPPluginReturnPromise
         ),
+
+        CAPPluginMethod(name: "download", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "warmup", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "prompt", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "endSession", returnType: CAPPluginReturnPromise),
-        CAPPluginMethod(name: "generateImage", returnType: CAPPluginReturnPromise)
+        CAPPluginMethod(name: "generateImage", returnType: CAPPluginReturnPromise),
     ]
 
     private let implementation = LocalLLM()
     private var availabilityPollingTask: Task<Void, Never>?
     private var forceAvailabilityListenerUpdate = false
-
-    override public func load() {
-
-    }
 
     @objc override public func addListener(_ call: CAPPluginCall) {
         super.addListener(call)
@@ -69,11 +67,14 @@ public class LocalLLMPlugin: CAPPlugin, CAPBridgedPlugin {
         ])
     }
 
+    @objc func download(_ call: CAPPluginCall) {
+        rejectCall(call, LocalLLMError.featureNotSupported("model download"))
+    }
+
     @objc func warmup(_ call: CAPPluginCall) {
         do {
-            guard let sessionId = call.getString("sessionId") else {
-                call.reject("sessionId is required")
-                return
+            guard let sessionId = call.getString("sessionId"), !sessionId.isEmpty else {
+                throw LocalLLMError.missingParameter("sessionId")
             }
 
             let promptPrefix = call.getString("promptPrefix")
@@ -85,12 +86,17 @@ public class LocalLLMPlugin: CAPPlugin, CAPBridgedPlugin {
 
             call.resolve()
         } catch {
-            call.reject(error.localizedDescription)
+            rejectCall(call, error)
         }
     }
 
     @objc func prompt(_ call: CAPPluginCall) {
         let options = getLLMPromptOptionsFromCall(call)
+
+        guard !options.prompt.isEmpty else {
+            rejectCall(call, LocalLLMError.missingParameter("prompt"))
+            return
+        }
 
         promptAsyncCallback(options: options) { result in
             switch result {
@@ -99,24 +105,27 @@ public class LocalLLMPlugin: CAPPlugin, CAPBridgedPlugin {
                     "text": responseText
                 ])
             case .failure(let error):
-                call.reject(error.localizedDescription)
+                self.rejectCall(call, error)
             }
         }
     }
 
     @objc func endSession(_ call: CAPPluginCall) {
-        guard let sessionId = call.getString("sessionId") else {
-            call.reject("sessionId is required")
-            return
-        }
+        do {
+            guard let sessionId = call.getString("sessionId"), !sessionId.isEmpty else {
+                throw LocalLLMError.missingParameter("sessionId")
+            }
 
-        implementation.endSession(sessionId)
-        call.resolve()
+            implementation.endSession(sessionId)
+            call.resolve()
+        } catch {
+            rejectCall(call, error)
+        }
     }
 
     @objc func generateImage(_ call: CAPPluginCall) {
-        guard let prompt = call.getString("prompt") else {
-            call.reject("prompt is required")
+        guard let prompt = call.getString("prompt"), !prompt.isEmpty else {
+            rejectCall(call, LocalLLMError.missingParameter("prompt"))
             return
         }
         let count = max(1, call.getInt("count", 1))
@@ -136,7 +145,7 @@ public class LocalLLMPlugin: CAPPlugin, CAPBridgedPlugin {
                     "pngBase64Images": base64Images
                 ])
             case .failure(let error):
-                call.reject(error.localizedDescription)
+                self.rejectCall(call, error)
             }
         }
     }
@@ -176,7 +185,8 @@ public class LocalLLMPlugin: CAPPlugin, CAPBridgedPlugin {
     }
 
     private func getLLMPromptOptionsFromCall(_ call: CAPPluginCall)
-    -> LLMPromptOptions {
+    -> LLMPromptOptions
+    {
         return LLMPromptOptions(
             sessionId: call.getString("sessionId"),
             instructions: call.getString("instructions"),
@@ -194,5 +204,13 @@ public class LocalLLMPlugin: CAPPlugin, CAPBridgedPlugin {
             temperature: optionsObject["temperature"] as? Double,
             maximumOutputTokens: optionsObject["maximumOutputTokens"] as? Int,
             )
+    }
+
+    private func rejectCall(_ call: CAPPluginCall, _ error: Error) {
+        if let llmError = error as? LocalLLMError {
+            call.reject(llmError.errorDescription ?? "Unknown error", llmError.errorCode)
+        } else {
+            call.reject(error.localizedDescription, "LOCAL_LLM_UNKNOWN_ERROR")
+        }
     }
 }
