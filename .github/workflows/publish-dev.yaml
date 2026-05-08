@@ -1,0 +1,30 @@
+name: Publish Dev
+
+on:
+  workflow_dispatch:
+
+jobs:
+  publish-dev:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: 'npm'
+          registry-url: 'https://registry.npmjs.org'
+
+      - run: npm ci
+
+      - run: npm run build
+
+      - name: Set dev version
+        run: |
+          SHA=$(git rev-parse --short HEAD)
+          npm version "0.0.0-dev.${SHA}" --no-git-tag-version
+
+      - name: Publish to npm
+        run: npm publish --tag dev --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
