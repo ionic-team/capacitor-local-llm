@@ -1,7 +1,7 @@
 {
   "name": "@capacitor/local-llm",
   "version": "1.0.0",
-  "description": "Capacitor plugin for running on-device LLMs, with support for text generation, image generation, and session management on iOS and Android.",
+  "description": "A Capacitor plugin for running on-device LLMs, with support for text generation, image generation, and session management on iOS and Android.",
   "main": "dist/plugin.cjs.js",
   "module": "dist/esm/index.js",
   "types": "dist/esm/index.d.ts",
