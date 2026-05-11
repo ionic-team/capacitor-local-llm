@@ -1,7 +1,7 @@
 {
   "name": "@capacitor/local-llm",
   "version": "1.0.0",
-  "description": "Capacitor Local LLM plugin",
+  "description": "Capacitor plugin for running on-device LLMs, with support for text generation, image generation, and session management on iOS and Android.",
   "main": "dist/plugin.cjs.js",
   "module": "dist/esm/index.js",
   "types": "dist/esm/index.d.ts",
@@ -27,7 +27,14 @@
   "keywords": [
     "capacitor",
     "plugin",
-    "native"
+    "native",
+    "llm",
+    "ai",
+    "on-device",
+    "local-llm",
+    "machine-learning",
+    "ios",
+    "android"
   ],
   "scripts": {
     "verify": "npm run verify:ios && npm run verify:android && npm run verify:web",
