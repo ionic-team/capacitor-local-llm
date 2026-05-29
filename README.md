@@ -61,7 +61,7 @@ if (status === 'downloadable') {
 
 ### iOS
 
-- **Text LLM requires iOS 26 and Apple Intelligence.** On iOS 18 and below, `systemAvailability()` returns `'unavailable'` for the text LLM and `prompt()` / `warmup()` will reject. Only select iPhones (iPhone 15 Pro or later) and iPads are compatible with Apple Inteligence. [More information here](https://www.apple.com/apple-intelligence/).
+- **Text LLM requires iOS 26 and Apple Intelligence.** On iOS 18 and below, `systemAvailability()` returns `'unavailable'` for the text LLM and `prompt()` / `warmup()` will reject. Only select iPhones (iPhone 15 Pro or later) and iPads are compatible with Apple Intelligence. [More information here](https://www.apple.com/apple-intelligence/).
 - **`download()` is not available on iOS.** The model is managed by the OS; use `systemAvailability()` to check readiness.
 - **Context limit is 4096 tokens.** This applies to the combined length of system instructions, conversation history, and the current prompt.
 
