@@ -60,9 +60,9 @@ const Tab1: React.FC = () => {
 
   const onDownloadingModel = async () => {
     try {
-      availabilityListenerRef.current = await LocalLLM.addListener('systemAvailabilityChange', (status) => {
-        setSystemStatus(status);
-        if (status === 'available' || status === 'unavailable') {
+      availabilityListenerRef.current = await LocalLLM.addListener('systemAvailabilityChange', (response) => {
+        setSystemStatus(response.status);
+        if (response.status === 'available' || response.status === 'unavailable') {
           availabilityListenerRef.current?.remove();
           availabilityListenerRef.current = null;
         }

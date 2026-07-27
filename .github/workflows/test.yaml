@@ -6,7 +6,7 @@ jobs:
   commitlint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - name: Install commitlint
@@ -14,10 +14,11 @@ jobs:
       - name: Validate pull request title
         if: github.event_name == 'pull_request'
         run: echo "${{ github.event.pull_request.title }}" | npx commitlint --verbose
-  verify:
+
+  build:
     runs-on: macos-26
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - uses: actions/setup-node@v6
@@ -25,6 +26,97 @@ jobs:
           node-version: 22
           cache: 'npm'
       - run: npm ci
-      - run: |
-          npm run lint
-          npm run verify
+      - run: npm run build
+
+  lint:
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run lint
+
+  verify-plugin-android:
+    needs: ['lint', 'build']
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run verify:android
+
+  verify-plugin-ios:
+    needs: ['lint', 'build']
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run verify:ios
+
+  build-example-app-android:
+    needs: ['verify-plugin-android']
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run build
+      - name: 'Install example app dependencies'
+        working-directory: ./example-app
+        run: npm i
+      - name: 'Build Web example app'
+        working-directory: ./example-app
+        run: npm run build
+      - name: 'Sync example app native platforms'
+        working-directory: ./example-app
+        run: npx cap sync
+      - name: 'Build Android example app'
+        working-directory: ./example-app/android
+        run: ./gradlew clean assembleDebug
+
+  build-example-app-ios:
+    needs: ['verify-plugin-ios']
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run build
+      - name: 'Install example app dependencies'
+        working-directory: ./example-app
+        run: npm i
+      - name: 'Build Web example app'
+        working-directory: ./example-app
+        run: npm run build
+      - name: 'Sync example app native platforms'
+        working-directory: ./example-app
+        run: npx cap sync
+      - name: 'Build iOS example app'
+        working-directory: ./example-app/ios/App
+        run: xcodebuild clean build -project App.xcodeproj -scheme App CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO
