@@ -17,7 +17,7 @@ import './Tab2.css';
 
 const formatError = (err: unknown): string => {
   const message = (err as Error).message ?? 'Unknown error';
-  const code = (err as any).code;
+  const code = (err as { code?: string }).code;
   return code ? `[${code}] ${message}` : message;
 };
 
