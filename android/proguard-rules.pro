@@ -19,3 +19,6 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+# ML Kit GenAI brings firebase-components, whose own rule doesn't keep these constructors under R8's strict full mode.
+-keep class * implements com.google.firebase.components.ComponentRegistrar { <init>(); }
